@@ -35,7 +35,7 @@
   if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || (class(x) != "character") )
     stop( "The program is not specified or as specified invalid" )
   
-  if ( ! file.exists( file.path( work_area, x ) ) )
+  if ( ! file.exists( file.path( work_area, x, fsep = "/" ) ) )
     stop( "The program ", x , " does not exist in the work area" )
   
   
@@ -56,7 +56,7 @@
   # -- spec program 
   
   exec_result[["program"]] <- c( "path" = cxlib:::.cxlib_standardpath( x ), 
-                                 "sha1" = digest::digest( cxlib:::.cxlib_standardpath( file.path( work_area, x) ), algo = "sha1", file = TRUE ) )
+                                 "sha1" = digest::digest( cxlib:::.cxlib_standardpath( file.path( work_area, x, fsep = "/") ), algo = "sha1", file = TRUE ) )
   
 
   # -- spec log
@@ -69,7 +69,7 @@
   # -- pre-inventory
   
   pre_inv <- sapply( list.files( work_area, recursive = TRUE, include.dirs = FALSE, full.names = FALSE ), function( z ) {
-    digest::digest( file.path( work_area, z), algo = "sha1", file = TRUE )
+    digest::digest( file.path( work_area, z, fsep = "/"), algo = "sha1", file = TRUE )
   }, USE.NAMES = TRUE )
   
   
@@ -77,66 +77,34 @@
   
   # -- batch execute program
   
-  #    - initiate batch cmd sequence
-  batch_cmd <- character(0)
+  batch_args <- character(0)
   
+  # - add R workspace flags
+  batch_args <- append( batch_args, c( "--no-restore --no-test" ) )
   
-  #    - add redirect to internal working directory
-  batch_cmd <- paste( "cd", work_area )
-  
-  
-  #    - build R command  
-  batch_cmd_r <- character(0)
-  
-  if ( ( .Platform$OS.type == "unix" ) && file.exists( file.path( R.home("bin"), "R") ) )
-    batch_cmd_r <- file.path( R.home("bin"), "R")
-  
-  if ( ( .Platform$OS.type == "windows" ) && file.exists( file.path( R.home("bin"), "R.exe") ) )
-    batch_cmd_r <- file.path( R.home("bin"), "R.exe")
-  
-  if ( ( length(batch_cmd_r) != 1 ) || ! file.exists( batch_cmd_r) )
-    stop( "Cannot identify R executable" )
-  
-  
-  #    - add batch instruction
-  batch_cmd_r <- append( batch_cmd_r, "CMD BATCH")
-  
-  #    - add program 
-  batch_cmd_r <- append( batch_cmd_r, exec_result[["program"]]["path"] )
-  
-  #    - add log 
-  batch_cmd_r <- append( batch_cmd_r, exec_result[["log"]]["path"] )
-  
-  #    - add std error redirect
-  if ( .Platform$OS.type == "unix" ) 
-    batch_cmd_r <- append( batch_cmd_r, "2>&1" )
-  
-  #    append R cmd to command sequence
-  batch_cmd <- append( batch_cmd, paste( batch_cmd_r, collapse = " ") )
-  
-  
-  #    - run program 
-  cmd <- paste( batch_cmd, collapse = " ; ")
-  
-  rc <- base::suppressWarnings( try( system( cmd, intern = TRUE, wait = TRUE ), silent = TRUE ) )  
+  # - add program 
+  batch_args <- append( batch_args, exec_result[["program"]]["path"] )
 
-  if ( inherits( rc, "try-error" ) || ! file.exists( file.path( work_area, exec_result[["log"]]["path"] ) ) ) {
-    
-    cat( c( "-----------------", "Command", cmd, "-----------------"), sep = "\n" )
-    
-    stop( "Executing program ", x, " failed" )
-  }
+  # - add log 
+  batch_args <- append( batch_args, exec_result[["log"]]["path"] )
   
+  # - run program
+  rc <- try( callr::rcmd( "BATCH", cmdargs = batch_args, wd = work_area, echo = FALSE, show = FALSE, spinner = FALSE ), silent = TRUE )
+
+
+  if ( inherits( rc, "try-error") || ( rc[["status"]] != 0 ) || ! file.exists( file.path( work_area, exec_result[["log"]]["path"], fsep = "/" ) ) )
+    stop( "Executing program ", x, " failed" )
+
   
   # -- add log reference to results  
-  exec_result[["log"]]["sha1"] <- digest::digest( file.path( work_area, exec_result[["log"]]["path"] ), algo = "sha1", file = TRUE )
+  exec_result[["log"]]["sha1"] <- digest::digest( file.path( work_area, exec_result[["log"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE )
 
   
 
   # -- post-inventory
   
   post_inv <- sapply( list.files( work_area, recursive = TRUE, include.dirs = FALSE, full.names = FALSE ), function( z ) {
-    digest::digest( file.path( work_area, z), algo = "sha1", file = TRUE )
+    digest::digest( file.path( work_area, z, fsep = "/"), algo = "sha1", file = TRUE )
   }, USE.NAMES = TRUE )
   
   
