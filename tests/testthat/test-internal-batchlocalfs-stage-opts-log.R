@@ -26,7 +26,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptSuffix", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -68,8 +68,8 @@ testthat::test_that( "batchlocalfs.programSingleLogOptSuffix", {
   
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
 })
 
@@ -97,7 +97,7 @@ testthat::test_that( "batchlocalfs.programMulitpleLogOptSuffix", {
   
   # test program
   
-  test_program_parent <- file.path( test_root, "some", "path", "to", "programs" )
+  test_program_parent <- file.path( test_root, "some", "path", "to", "programs", fsep = "/" )
   
   test_programs <- replicate( 5, 
                               base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = test_program_parent , fileext = ".R" ) ),
@@ -126,14 +126,14 @@ testthat::test_that( "batchlocalfs.programMulitpleLogOptSuffix", {
   expected_actions <- lapply( test_programs_relpath, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( test_root, x), algo = "sha1", file = TRUE ),
+          "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ),
           "log" = c( "path" = paste0( tools::file_path_sans_ext(x), ".log"),
                      "sha1" = NA,
                      "reference.sha1" = NA ) ) 
   })
   
   
-  expected_files <- file.path( result[["work.area"]], test_programs_relpath )
+  expected_files <- file.path( result[["work.area"]], test_programs_relpath, fsep = "/" )
   
   # -- assertions
   
@@ -151,7 +151,7 @@ testthat::test_that( "batchlocalfs.programMulitpleLogOptSuffix", {
   # staged program
   testthat::expect_true( all( file.exists(expected_files) ) )
   testthat::expect_true( all( sapply( expected_actions, function(x) {
-    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]]), algo = "sha1", file = TRUE ) )
+    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]], fsep = "/"), algo = "sha1", file = TRUE ) )
   }) ) ) 
   
   
@@ -181,7 +181,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPathNotExist", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -198,7 +198,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPathNotExist", {
   # logs directory
   test_log_relpath <- "some/path/to/logs"
   
-  if ( dir.exists( file.path( test_root, test_log_relpath)) )
+  if ( dir.exists( file.path( test_root, test_log_relpath, fsep = "/")) )
     testthat::fail( "Unexpected logs directory exists" )
   
   
@@ -235,7 +235,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPath", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -253,7 +253,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPath", {
   # logs directory
   test_log_relpath <- "some/path/to/logs"
   
-  if ( ! dir.exists( file.path( test_root, test_log_relpath ) ) && ! dir.create( file.path( test_root, test_log_relpath), recursive = TRUE ) )
+  if ( ! dir.exists( file.path( test_root, test_log_relpath, fsep = "/" ) ) && ! dir.create( file.path( test_root, test_log_relpath, fsep = "/"), recursive = TRUE ) )
     testthat::fail( "Could not stage logs directory" )
   
   
@@ -292,12 +292,12 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPath", {
   
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
 
   
   # staged logs directory 
-  testthat::expect_true( dir.exists( file.path( result[["work.area"]], expected_logs_path ) ) )
+  testthat::expect_true( dir.exists( file.path( result[["work.area"]], expected_logs_path, fsep = "/" ) ) )
   
 })
 
@@ -326,7 +326,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPathFileExt", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -344,7 +344,7 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPathFileExt", {
   # logs directory
   test_log_relpath <- "some/path/to/logs"
   
-  if ( ! dir.exists( file.path( test_root, test_log_relpath ) ) && ! dir.create( file.path( test_root, test_log_relpath), recursive = TRUE ) )
+  if ( ! dir.exists( file.path( test_root, test_log_relpath, fsep = "/" ) ) && ! dir.create( file.path( test_root, test_log_relpath, fsep = "/"), recursive = TRUE ) )
     testthat::fail( "Could not stage logs directory" )
   
   
@@ -385,12 +385,12 @@ testthat::test_that( "batchlocalfs.programSingleLogOptPathFileExt", {
   
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # staged logs directory 
-  testthat::expect_true( dir.exists( file.path( result[["work.area"]], expected_logs_path ) ) )
+  testthat::expect_true( dir.exists( file.path( result[["work.area"]], expected_logs_path, fsep = "/" ) ) )
   
 })
 

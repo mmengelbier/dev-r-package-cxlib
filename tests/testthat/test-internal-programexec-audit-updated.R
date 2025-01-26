@@ -34,14 +34,14 @@ testthat::test_that( "programexec.auditUpdated", {
   # test output area
   test_output_parent_ref <- file.path( "some", "path", "to", "outputs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( test_root, test_output_parent_ref ) ) && ! dir.create( file.path( test_root, test_output_parent_ref ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( test_root, test_output_parent_ref, fsep = "/" ) ) && ! dir.create( file.path( test_root, test_output_parent_ref, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not create test output parent directory" )
   
   # stage outputs
   base::writeLines( paste( base::sample( c( letters, LETTERS, as.character(0:9) ) , 40 ), collapse = "" ), 
                     con = file.path( test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
   
-  if ( ! file.exists( file.path( test_root, test_output_parent_ref, "output.txt") ) )
+  if ( ! file.exists( file.path( test_root, test_output_parent_ref, "output.txt", fsep = "/") ) )
     testthat::fail( "Could not stage output file" )
   
 
@@ -68,7 +68,7 @@ testthat::test_that( "programexec.auditUpdated", {
   
   # reference sha1
   ref_sha1 <- sapply( list.files( test_root, recursive = TRUE, full.names = FALSE, include.dirs = FALSE ), function(x) {
-    digest::digest( file.path( test_root, x), algo = "sha1", file = TRUE ) 
+    digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) 
   }, USE.NAMES = TRUE )
   
   
@@ -114,15 +114,15 @@ testthat::test_that( "programexec.auditUpdated", {
   # program
   testthat::expect_true( "program" %in% names(result) )  
   testthat::expect_equal( result[["program"]], expected_program ) 
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"] ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
+  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
   
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
   
   # verify test reference is in output
-  output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt" ) )
+  output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
   testthat::expect_true( any( output_lines == test_reference ) )
   
   # audit
@@ -164,7 +164,7 @@ testthat::test_that( "programexec.auditMultiUpdated", {
   test_output_parent_refs <- paste( file.path( "some", "path", "to", fsep = "/" ), rep( paste0( "output-", as.character(1:2)), 3), sep = "/" )
   
   for ( xpath in unique(test_output_parent_refs) )
-    if ( ! dir.exists( file.path( test_root, xpath ) ) && ! dir.create( file.path( test_root, xpath ), recursive = TRUE) )
+    if ( ! dir.exists( file.path( test_root, xpath, fsep = "/" ) ) && ! dir.create( file.path( test_root, xpath, fsep = "/" ), recursive = TRUE) )
       testthat::fail( "Could not create test output parent directory" )
 
   
@@ -221,7 +221,7 @@ testthat::test_that( "programexec.auditMultiUpdated", {
   
   # reference sha1
   ref_sha1 <- sapply( list.files( test_root, recursive = TRUE, full.names = FALSE, include.dirs = FALSE ), function(x) {
-    digest::digest( file.path( test_root, x), algo = "sha1", file = TRUE ) 
+    digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) 
   }, USE.NAMES = TRUE )
   
   
@@ -269,12 +269,12 @@ testthat::test_that( "programexec.auditMultiUpdated", {
   # program
   testthat::expect_true( "program" %in% names(result) )
   testthat::expect_equal( result[["program"]], expected_program )
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"] ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
+  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
 
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) )
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) )
 
   # audit
   testthat::expect_true( "audit" %in% names(result) )

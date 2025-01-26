@@ -53,7 +53,7 @@ testthat::test_that( "programanno.paramLengthNotOne", {
 testthat::test_that( "programanno.paramEmpty", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )) 
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -65,7 +65,7 @@ testthat::test_that( "programanno.paramEmpty", {
   
 
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   if ( file.exists( test_program ) )
     testthat::fail("Unexpected test program exists")
@@ -82,7 +82,7 @@ testthat::test_that( "programanno.paramEmpty", {
 testthat::test_that( "programanno.programEmpty", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) ) 
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -94,7 +94,7 @@ testthat::test_that( "programanno.programEmpty", {
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   writeLines( character(0), con = test_program )
   
@@ -118,7 +118,7 @@ testthat::test_that( "programanno.programEmpty", {
 testthat::test_that( "programanno.programNoAnnotations", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -130,7 +130,7 @@ testthat::test_that( "programanno.programNoAnnotations", {
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   writeLines( "# test program with no annotations", con = test_program )
   
@@ -154,7 +154,7 @@ testthat::test_that( "programanno.programNoAnnotations", {
 testthat::test_that( "programanno.programSingleAnnotation", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -166,7 +166,7 @@ testthat::test_that( "programanno.programSingleAnnotation", {
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   pgm_lines <- c( "# test program with no annotations",
                   "@abc 123",
@@ -198,7 +198,7 @@ testthat::test_that( "programanno.programSingleAnnotation", {
 testthat::test_that( "programanno.programSingleAnnotationIgnoreNonPrefix", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -210,7 +210,7 @@ testthat::test_that( "programanno.programSingleAnnotationIgnoreNonPrefix", {
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   pgm_lines <- c( "# test program with no annotations",
                   "# @abc 123",
@@ -241,7 +241,7 @@ testthat::test_that( "programanno.programSingleAnnotationIgnoreNonPrefix", {
 testthat::test_that( "programanno.programSingleAnnotationKewordMultipleValues", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -253,7 +253,7 @@ testthat::test_that( "programanno.programSingleAnnotationKewordMultipleValues", 
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   pgm_lines <- c( "# test program with no annotations",
                   "  # @cx.def 123",
@@ -283,7 +283,7 @@ testthat::test_that( "programanno.programSingleAnnotationKewordMultipleValues", 
 testthat::test_that( "programanno.programMultiAnnotationKewordMultipleValues", {
   
   # -- stage
-  test_root <-base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) 
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -295,7 +295,7 @@ testthat::test_that( "programanno.programMultiAnnotationKewordMultipleValues", {
   
   
   # test program that does not exist
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" )
+  test_program <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ))
   
   pgm_lines <- c( "# test program with no annotations",
                   "  # @cx.def 123",

@@ -49,15 +49,15 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkArea
   
   test_program_parent <- file.path( "some", "path", "to", "programs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( wrkdir, test_program_parent ) ) && ! dir.create( file.path( wrkdir, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkdir, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkdir, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory under working directory" )
   
-  if ( ! dir.exists( file.path( wrkarea, test_program_parent ) ) && ! dir.create( file.path( wrkarea, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkarea, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkarea, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory in work area" )
   
   
   test_programs <- replicate( 3, 
-                              base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ),
+                              cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ) ),
                               simplify = TRUE )
     
   
@@ -74,7 +74,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkArea
     if ( ! file.exists( xprg ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
     
   }
@@ -83,16 +83,16 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkArea
   test_actions <- lapply( test_program_refs, function(x) {
    list( "type" = "program",
          "path" = x,
-         "sha1" = digest::digest( file.path( wrkdir, x ), algo = "sha1", file = TRUE ) ) 
+         "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ) ) 
   })  
   
     
   # manipulate last action to fail sha1 on work area
   base::writeLines( c( "# updated test program", 
                        paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ),
-                    con = file.path( wrkarea, test_actions[[ length(test_actions) ]][["path"]] ) )
+                    con = file.path( wrkarea, test_actions[[ length(test_actions) ]][["path"]], fsep = "/" ) )
   
-  if ( digest::digest( file.path( wrkarea, test_actions[[ length(test_actions) ]][["path"]] ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
+  if ( digest::digest( file.path( wrkarea, test_actions[[ length(test_actions) ]][["path"]], fsep = "/" ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
     testthat::fail( "Failed to stage test program SHA-1 failure in work area" )
 
   
@@ -156,15 +156,15 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkingD
   
   test_program_parent <- file.path( "some", "path", "to", "programs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( wrkdir, test_program_parent ) ) && ! dir.create( file.path( wrkdir, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkdir, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkdir, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory under working directory" )
   
-  if ( ! dir.exists( file.path( wrkarea, test_program_parent ) ) && ! dir.create( file.path( wrkarea, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkarea, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkarea, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory in work area" )
   
   
   test_programs <- replicate( 3, 
-                              base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ),
+                              cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" )),
                               simplify = TRUE )
   
   
@@ -181,7 +181,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkingD
     if ( ! file.exists( xprg ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
     
   }
@@ -190,16 +190,16 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailWorkingD
   test_actions <- lapply( test_program_refs, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( wrkdir, x ), algo = "sha1", file = TRUE ) ) 
+          "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/"), algo = "sha1", file = TRUE ) ) 
   })  
   
   
   # manipulate last action to fail sha1 on working directory
   base::writeLines( c( "# updated test program", 
                        paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ),
-                    con = file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]] ) )
+                    con = file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]], fsep = "/" ) )
   
-  if ( digest::digest( file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]] ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
+  if ( digest::digest( file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]], fsep = "/" ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
     testthat::fail( "Failed to stage test program SHA-1 failure in working directory" )
   
   
@@ -261,15 +261,15 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailSHARecor
   
   test_program_parent <- file.path( "some", "path", "to", "programs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( wrkdir, test_program_parent ) ) && ! dir.create( file.path( wrkdir, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkdir, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkdir, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory under working directory" )
   
-  if ( ! dir.exists( file.path( wrkarea, test_program_parent ) ) && ! dir.create( file.path( wrkarea, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkarea, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkarea, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory in work area" )
   
   
   test_programs <- replicate( 3, 
-                              base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ),
+                              cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" )),
                               simplify = TRUE )
   
   
@@ -286,7 +286,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailSHARecor
     if ( ! file.exists( xprg ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
     
   }
@@ -295,7 +295,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailSHARecor
   test_actions <- lapply( test_program_refs, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( wrkdir, x ), algo = "sha1", file = TRUE ) ) 
+          "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ) ) 
   })  
   
   
@@ -305,7 +305,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsProgramIntegrityFailSHARecor
                                                                       algo = "sha1", 
                                                                       file = FALSE )
   
-  if ( digest::digest( file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]] ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
+  if ( digest::digest( file.path( wrkdir, test_actions[[ length(test_actions) ]][["path"]], fsep = "/" ), algo = "sha1", file = TRUE ) == test_actions[[ length(test_actions) ]][["sha1"]] )
     testthat::fail( "Failed to stage test program SHA-1 failure in input record" )
   
   
@@ -368,15 +368,15 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityFailPriorLogNotE
   
   test_program_parent <- file.path( "some", "path", "to", "programs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( wrkdir, test_program_parent ) ) && ! dir.create( file.path( wrkdir, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkdir, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkdir, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory under working directory" )
   
-  if ( ! dir.exists( file.path( wrkarea, test_program_parent ) ) && ! dir.create( file.path( wrkarea, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkarea, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkarea, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory in work area" )
   
   
   test_programs <- replicate( 3, 
-                              base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ),
+                              cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" )),
                               simplify = TRUE )
   
   
@@ -393,7 +393,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityFailPriorLogNotE
     if ( ! file.exists( xprg ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
     
   }
@@ -402,7 +402,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityFailPriorLogNotE
   test_actions <- lapply( test_program_refs, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( wrkdir, x ), algo = "sha1", file = TRUE ), 
+          "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ), 
           "log" = c( "path" = paste0( tools::file_path_sans_ext( x ), ".Rout"), 
                      "sha1" = NA,
                      "reference.sha1" = NA )
@@ -477,15 +477,15 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityPriorLogExists",
   
   test_program_parent <- file.path( "some", "path", "to", "programs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( wrkdir, test_program_parent ) ) && ! dir.create( file.path( wrkdir, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkdir, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkdir, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory under working directory" )
   
-  if ( ! dir.exists( file.path( wrkarea, test_program_parent ) ) && ! dir.create( file.path( wrkarea, test_program_parent ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( wrkarea, test_program_parent, fsep = "/" ) ) && ! dir.create( file.path( wrkarea, test_program_parent, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not stage test program directory in work area" )
   
   
   test_programs <- replicate( 3, 
-                              base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" ),
+                              cxlib:::.cxlib_standardpath( base::tempfile( pattern = "test-program-", tmpdir = file.path( wrkdir, test_program_parent, fsep = "/" ), fileext = ".R" )),
                               simplify = TRUE )
   
   
@@ -504,7 +504,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityPriorLogExists",
     if ( ! file.exists( xprg ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
 
     
@@ -522,7 +522,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityPriorLogExists",
   test_actions <- lapply( test_program_refs, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( wrkdir, x ), algo = "sha1", file = TRUE ), 
+          "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ), 
           "log" = c( "path" = paste0( tools::file_path_sans_ext( x ), ".Rout"), 
                      "sha1" = NA,
                      "reference.sha1" = digest::digest( file.path( wrkdir, paste0( tools::file_path_sans_ext( x ), ".Rout"), fsep = "/"), algo = "sha1", file = TRUE ) )

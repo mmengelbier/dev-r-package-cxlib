@@ -32,7 +32,7 @@ testthat::test_that( "programexec.auditCreated", {
   # test output area
   test_output_parent_ref <- file.path( "some", "path", "to", "outputs", fsep = "/" )
   
-  if ( ! dir.exists( file.path( test_root, test_output_parent_ref ) ) && ! dir.create( file.path( test_root, test_output_parent_ref ), recursive = TRUE) )
+  if ( ! dir.exists( file.path( test_root, test_output_parent_ref, fsep = "/" ) ) && ! dir.create( file.path( test_root, test_output_parent_ref, fsep = "/" ), recursive = TRUE) )
     testthat::fail( "Could not create test output parent directory" )
   
   
@@ -73,7 +73,7 @@ testthat::test_that( "programexec.auditCreated", {
   
   expected_created <- lapply( sort(expected_created_files), function(x) {
     c( "path" = x, 
-       "sha1" = digest::digest( file.path(test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path(test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   }) 
   
   
@@ -91,10 +91,10 @@ testthat::test_that( "programexec.auditCreated", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/" ) ) ) 
   
   # verify test reference is in output
-  output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt" ) )
+  output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
   testthat::expect_true( any( output_lines == test_reference ) )
   
   # audit
@@ -138,7 +138,7 @@ testthat::test_that( "programexec.auditMultiCreated", {
   test_output_parent_refs <- paste( file.path( "some", "path", "to", fsep = "/" ), rep( paste0( "output-", as.character(1:2)), 3), sep = "/" )
   
   for ( xpath in unique(test_output_parent_refs) )
-    if ( ! dir.exists( file.path( test_root, xpath ) ) && ! dir.create( file.path( test_root, xpath ), recursive = TRUE) )
+    if ( ! dir.exists( file.path( test_root, xpath, fsep = "/" ) ) && ! dir.create( file.path( test_root, xpath, fsep = "/" ), recursive = TRUE) )
       testthat::fail( "Could not create test output parent directory" )
 
   
@@ -192,7 +192,7 @@ testthat::test_that( "programexec.auditMultiCreated", {
   
   expected_created <- lapply( sort(expected_created_files), function(x) {
     c( "path" = x, 
-       "sha1" = digest::digest( file.path(test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path(test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   }) 
   
   
@@ -210,7 +210,7 @@ testthat::test_that( "programexec.auditMultiCreated", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/") ) ) 
 
   
   # audit
@@ -253,7 +253,7 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
   test_output_parent_refs <- paste( file.path( "some", "path", "to", fsep = "/" ), rep( paste0( "output-", as.character(1:2)), 3), sep = "/" )
   
   for ( xpath in unique(test_output_parent_refs) )
-    if ( ! dir.exists( file.path( test_root, xpath ) ) && ! dir.create( file.path( test_root, xpath ), recursive = TRUE) )
+    if ( ! dir.exists( file.path( test_root, xpath, fsep = "/" ) ) && ! dir.create( file.path( test_root, xpath, fsep = "/" ), recursive = TRUE) )
       testthat::fail( "Could not create test output parent directory" )
   
   
@@ -315,7 +315,7 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
 
   expected_created <- lapply( sort(expected_created_files), function(x) {
     c( "path" = x, 
-       "sha1" = digest::digest( file.path(test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path(test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   }) 
   
   
@@ -333,7 +333,7 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
   
   
   # audit

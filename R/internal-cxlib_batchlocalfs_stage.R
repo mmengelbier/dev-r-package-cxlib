@@ -66,7 +66,7 @@
     # note: xpath is relative    
     xpath <- character(0)
 
-    if ( file.exists( xitem ) && file.exists( file.path( jdef[["working.directory"]], xitem ) ) ) {
+    if ( file.exists( xitem ) && file.exists( file.path( jdef[["working.directory"]], xitem, fsep = "/" ) ) ) {
       # relative path as both item and item in working directory directory
       
       xpath <- cxlib:::.cxlib_standardpath( xitem )
@@ -94,7 +94,7 @@
       # log directory
       if ( "logs" %in% names(options) ) {
         
-        if ( ! dir.exists( file.path( jdef[["working.directory"]], options[["logs"]] ) ) )
+        if ( ! dir.exists( file.path( jdef[["working.directory"]], options[["logs"]], fsep = "/" ) ) )
           stop( "The specified directory for logs does not exist" )
         
         log_dir <- cxlib:::.cxlib_standardpath( options[["logs"]] )
@@ -108,7 +108,7 @@
     }
     
     
-    log_path <- file.path( log_dir, paste0( tools::file_path_sans_ext( base::basename(xpath)), ".", log_suffix ) )
+    log_path <- file.path( log_dir, paste0( tools::file_path_sans_ext( base::basename(xpath)), ".", log_suffix ), fsep = "/" )
  
 
     # note: sha1 for current log in working directory     
@@ -192,7 +192,7 @@
           
           # stage parent directories for inputs in work area
           
-          xfile_parent <- base::dirname( file.path( jdef[["work.area"]], xfile ) )
+          xfile_parent <- base::dirname( file.path( jdef[["work.area"]], xfile, fsep = "/" ) )
           
           if ( ! dir.exists( xfile_parent  ) && 
                ! dir.create( xfile_parent, recursive = TRUE ) )
@@ -201,21 +201,21 @@
 
           # futility ... no need to stage file twice
           
-          if ( file.exists( file.path( jdef[["work.area"]], xfile ) ) ) 
+          if ( file.exists( file.path( jdef[["work.area"]], xfile, fsep = "/" ) ) ) 
             next()
 
           
           # stage file          
 
-          src_digest <- digest::digest( file.path( jdef[["working.directory"]], xfile ), algo = "sha1", file = TRUE )
+          src_digest <- digest::digest( file.path( jdef[["working.directory"]], xfile, fsep = "/" ), algo = "sha1", file = TRUE )
           
-          if ( ! file.copy( file.path( jdef[["working.directory"]], xfile ), 
+          if ( ! file.copy( file.path( jdef[["working.directory"]], xfile, fsep = "/" ), 
                             xfile_parent, 
                             copy.mode = FALSE, copy.date = FALSE ) )
             stop( "Could not stage input file ", xfile )
           
         
-          if ( digest::digest( file.path( jdef[["work.area"]], xfile ), algo = "sha1", file = TRUE ) != src_digest )
+          if ( digest::digest( file.path( jdef[["work.area"]], xfile, fsep = "/" ), algo = "sha1", file = TRUE ) != src_digest )
             stop( "File incosistency when staging input file ", xfile )
           
           # register file as an input
@@ -231,11 +231,11 @@
     if ( "output" %in% names(xanno) )
       for ( xoutput in xanno[["output"]] ) {
 
-        if ( ! dir.exists( file.path( jdef[["working.directory"]], xoutput ) ) )
+        if ( ! dir.exists( file.path( jdef[["working.directory"]], xoutput, fsep = "/" ) ) )
           stop( "Output directory ", xoutput, " does not exist or is not a relative path to the working directory" )
         
         # generate full path in work area
-        xpath <- cxlib:::.cxlib_standardpath( file.path( jdef[["work.area"]], xoutput ) )
+        xpath <- cxlib:::.cxlib_standardpath( file.path( jdef[["work.area"]], xoutput, fsep = "/" ) )
         
         if ( ! dir.exists( xpath ) && ! dir.create( xpath, recursive = TRUE ) )
           stop( "Could not stage output path ", xoutput )

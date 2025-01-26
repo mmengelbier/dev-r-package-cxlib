@@ -137,7 +137,7 @@ testthat::test_that( "programexec.programLog", {
   on.exit({
     base::setwd( current_wd )
     base::unlink( test_root, recursive = TRUE, force = TRUE )
-  }, add = TRUE )  
+  }, add = TRUE )
   
   
   if ( dir.exists( test_root ) || ! dir.create( test_root, recursive = TRUE ) )
@@ -193,7 +193,7 @@ testthat::test_that( "programexec.programLog", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/") ) ) 
 
   # verify test reference is in log
   log_lines <- base::readLines( con = result[["log"]][["path"]] )
@@ -282,7 +282,7 @@ testthat::test_that( "programexec.workareaNull", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
 
   # verify test reference is in log
   log_lines <- base::readLines( con = result[["log"]][["path"]] )
@@ -543,10 +543,10 @@ testthat::test_that( "programexec.workareaNotWorkdirWorkarea", {
   # log
   testthat::expect_true( "log" %in% names(result) )
   testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]])) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
 
   # verify test reference is in log
-  log_lines <- base::readLines( con = file.path(test_root, result[["log"]][["path"]]) )
+  log_lines <- base::readLines( con = file.path(test_root, result[["log"]][["path"]], fsep = "/") )
   testthat::expect_true( any( base::startsWith( log_lines, paste0( "--->", test_root, "<---" ) )) )
 
   # audit

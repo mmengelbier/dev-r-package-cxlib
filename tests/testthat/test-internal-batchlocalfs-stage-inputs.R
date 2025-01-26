@@ -29,7 +29,7 @@ testthat::test_that( "batchlocalfs-input.programNoInput", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -69,8 +69,8 @@ testthat::test_that( "batchlocalfs-input.programNoInput", {
   testthat::expect_equal( result[["actions"]][[1]], expected_action )
 
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # no input annotation
@@ -102,7 +102,7 @@ testthat::test_that( "batchlocalfs-input.programInputNotExist", {
   base::setwd( test_root )
   
   # test input
-  test_input <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input" ), fileext = ".txt" ) )
+  test_input <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input", fsep = "/" ), fileext = ".txt" ) )
   
   if ( file.exists( test_input ) )
     testthat::fail( "Test input exists" )
@@ -114,7 +114,7 @@ testthat::test_that( "batchlocalfs-input.programInputNotExist", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -156,8 +156,8 @@ testthat::test_that( "batchlocalfs-input.programInputNotExist", {
   testthat::expect_equal( result[["actions"]][[1]], expected_action )
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # no input annotation
@@ -193,7 +193,7 @@ testthat::test_that( "batchlocalfs-input.programInputFile", {
   
   
   # test input
-  test_input <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input" ), fileext = ".txt" ) )
+  test_input <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input", fsep = "/" ), fileext = ".txt" ) )
   
   if ( file.exists( test_input ) )
     testthat::fail( "Test input exists" )
@@ -209,7 +209,7 @@ testthat::test_that( "batchlocalfs-input.programInputFile", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -256,8 +256,8 @@ testthat::test_that( "batchlocalfs-input.programInputFile", {
   testthat::expect_equal( result[["actions"]][[1]], expected_action )
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # input annotations
@@ -298,7 +298,7 @@ testthat::test_that( "batchlocalfs-input.programInputDirectory", {
   
   for ( i in 1:10 )
     test_inputs <- append( test_inputs,
-                           base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "inputs" ), fileext = ".txt" ) ) )
+                           base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "inputs", fsep = "/" ), fileext = ".txt" ) ) )
   
   if ( any(file.exists( test_inputs )) )
     testthat::fail( "Test inputs exists" )
@@ -316,7 +316,7 @@ testthat::test_that( "batchlocalfs-input.programInputDirectory", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -346,7 +346,7 @@ testthat::test_that( "batchlocalfs-input.programInputDirectory", {
   
   expected_inputs <- lapply( sort(test_inputs_ref), function(x) {
     c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   })
   
 
@@ -365,8 +365,8 @@ testthat::test_that( "batchlocalfs-input.programInputDirectory", {
   testthat::expect_equal( result[["actions"]][[1]], expected_action )
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # input annotations
@@ -424,7 +424,7 @@ testthat::test_that( "batchlocalfs-input.programMultiInput", {
     
   
   
-  test_input_file <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input" ), fileext = ".txt" ) )
+  test_input_file <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input", fsep = "/" ), fileext = ".txt" ) )
   
   if ( file.exists( test_input_file ) )
     testthat::fail( "Test input exists" )
@@ -440,7 +440,7 @@ testthat::test_that( "batchlocalfs-input.programMultiInput", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -475,7 +475,7 @@ testthat::test_that( "batchlocalfs-input.programMultiInput", {
 
   expected_inputs <- lapply( sort( c( base::substring( test_inputdir_files, base::nchar( test_root ) + 2 ), test_input_file_ref) ), function(x) {
     c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   })  
   
   
@@ -493,8 +493,8 @@ testthat::test_that( "batchlocalfs-input.programMultiInput", {
   testthat::expect_equal( result[["actions"]][[1]], expected_action )
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
   
   # input annotations
@@ -551,7 +551,7 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   
   
   
-  test_input_file <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input" ), fileext = ".txt" ) )
+  test_input_file <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-input-", tmpdir = file.path( test_root, "some", "path", "to", "input", fsep = "/" ), fileext = ".txt" ) )
   
   if ( file.exists( test_input_file ) )
     testthat::fail( "Test input exists" )
@@ -617,7 +617,7 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   expected_actions <- lapply( test_programs_relpath, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( test_root, x), algo = "sha1", file = TRUE ),
+          "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ),
           "log" = c( "path" = paste0( tools::file_path_sans_ext(x), ".Rout"),
                      "sha1" = NA,
                      "reference.sha1" = NA ) )
@@ -626,11 +626,11 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
 
   expected_inputs <- lapply( sort( c( base::substring( test_inputdir_files, base::nchar( test_root ) + 2 ), test_input_file_ref) ), function(x) {
     c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   })  
   
   
-  expected_program_files <- file.path( result[["work.area"]], test_programs_relpath )
+  expected_program_files <- file.path( result[["work.area"]], test_programs_relpath, fsep = "/" )
   
   
   # -- assertions
@@ -648,7 +648,7 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   # staged program
   testthat::expect_true( all(file.exists( expected_program_files )) )
   testthat::expect_true( all( sapply( expected_actions, function(x) {
-    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]]), algo = "sha1", file = TRUE ) )
+    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]], fsep = "/"), algo = "sha1", file = TRUE ) )
   }) ) ) 
   
   

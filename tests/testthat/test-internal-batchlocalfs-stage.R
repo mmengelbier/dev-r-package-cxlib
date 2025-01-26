@@ -92,7 +92,7 @@ testthat::test_that( "batchlocalfs.programSingleNotExist", {
   
   # -- stage
   
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
 
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -122,7 +122,7 @@ testthat::test_that( "batchlocalfs.programSingleNotExist", {
   
   # -- stage
   
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -164,7 +164,7 @@ testthat::test_that( "batchlocalfs.programSingleNotInWorkingDirectory", {
   
   # -- stage
   
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   on.exit({
     base::unlink( test_root, recursive = TRUE, force = TRUE )
@@ -185,7 +185,7 @@ testthat::test_that( "batchlocalfs.programSingleNotInWorkingDirectory", {
     
   # test work directory
   
-  test_wd <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_wd <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
 
   current_wd <- base::getwd()
     
@@ -230,7 +230,7 @@ testthat::test_that( "batchlocalfs.programSingleSimpleAbsPath", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -271,8 +271,8 @@ testthat::test_that( "batchlocalfs.programSingleSimpleAbsPath", {
 
 
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
 
 })
 
@@ -299,7 +299,7 @@ testthat::test_that( "batchlocalfs.programSingleSimpleRelPath", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -341,8 +341,8 @@ testthat::test_that( "batchlocalfs.programSingleSimpleRelPath", {
   
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
 })
 
@@ -372,7 +372,7 @@ testthat::test_that( "batchlocalfs.programMultipleSimpleRelPath", {
   
   # test program
   
-  test_program_parent <- file.path( test_root, "some", "path", "to", "programs" )
+  test_program_parent <- file.path( test_root, "some", "path", "to", "programs", fsep = "/" )
   
   test_programs <- replicate( 5, 
                               base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = test_program_parent , fileext = ".R" ) ),
@@ -401,14 +401,14 @@ testthat::test_that( "batchlocalfs.programMultipleSimpleRelPath", {
   expected_actions <- lapply( test_programs_relpath, function(x) {
     list( "type" = "program",
           "path" = x,
-          "sha1" = digest::digest( file.path( test_root, x), algo = "sha1", file = TRUE ),
+          "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ),
           "log" = c( "path" = paste0( tools::file_path_sans_ext(x), ".Rout"),
                      "sha1" = NA,
                      "reference.sha1" = NA ) ) 
   })
   
   
-  expected_files <- file.path( result[["work.area"]], test_programs_relpath )
+  expected_files <- file.path( result[["work.area"]], test_programs_relpath, fsep = "/" )
 
   # -- assertions
 
@@ -426,7 +426,7 @@ testthat::test_that( "batchlocalfs.programMultipleSimpleRelPath", {
   # staged program
   testthat::expect_true( all( file.exists(expected_files) ) )
   testthat::expect_true( all( sapply( expected_actions, function(x) {
-    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]]), algo = "sha1", file = TRUE ) )
+    ( x[["sha1"]] == digest::digest( file.path( result[["work.area"]], x[["path"]], fsep = "/"), algo = "sha1", file = TRUE ) )
   }) ) ) 
   
 
@@ -457,7 +457,7 @@ testthat::test_that( "batchlocalfs.programSingleLogExists", {
   
   
   # test program
-  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs" ), fileext = ".R" ) )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, "some", "path", "to", "programs", fsep = "/" ), fileext = ".R" ) )
   
   if ( dir.exists( base::dirname( test_program ) ) || ! dir.create( base::dirname( test_program ), recursive = TRUE ) )
     testthat::fail( "Could not stage test program parent directory" )
@@ -514,8 +514,8 @@ testthat::test_that( "batchlocalfs.programSingleLogExists", {
   
   
   # staged program
-  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]] ) ))
-  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]] ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
+  testthat::expect_true( file.exists( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ) ))
+  testthat::expect_equal( digest::digest( file.path( result[["work.area"]], expected_action[["path"]], fsep = "/" ), algo = "sha1", file = TRUE ), unname(expected_action[["sha1"]]) )
   
 })
 

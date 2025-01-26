@@ -84,8 +84,8 @@
     if ( all( c( "type", "path", "sha1") %in% names(xact) ) && ( "program" %in% xact[["type"]]) ) {
       
       # note: integrity is all equal
-      sha1_hashes <- c( digest::digest( file.path( jresults[["working.directory"]], xact[["path"]]), algo = "sha1", file = TRUE ), 
-                        digest::digest( file.path( jresults[["work.area"]], xact[["path"]]), algo = "sha1", file = TRUE ),
+      sha1_hashes <- c( digest::digest( file.path( jresults[["working.directory"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ), 
+                        digest::digest( file.path( jresults[["work.area"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ),
                         xact[["sha1"]] )
       
       
@@ -127,15 +127,15 @@
       
       xpath <- ifelse( ("path" %in% names(xout)), unlist(xout["path"], use.names = FALSE), xout )
       
-      if ( ! dir.exists( file.path( jresults[["work.area"]], xpath, sep = "/" ) ) )
+      if ( ! dir.exists( file.path( jresults[["work.area"]], xpath, fsep = "/" ) ) )
         next()
 
       # - futility ... make sure we have a valid destination
-      if ( ! dir.exists( file.path( jresults[["working.directory"]], xpath, sep = "/" ) ) )
+      if ( ! dir.exists( file.path( jresults[["working.directory"]], xpath, fsep = "/" ) ) )
         stop( "The output directory ", xpath, " does not exist in the working directory" )
         
             
-      xpath_files <- list.files( file.path( jresults[["work.area"]], xpath, sep = "/" ), full.names = FALSE, recursive = FALSE, include.dirs = FALSE )
+      xpath_files <- list.files( file.path( jresults[["work.area"]], xpath, fsep = "/" ), full.names = FALSE, recursive = FALSE, include.dirs = FALSE )
 
       lst_files <- base::unique( append( lst_files, file.path( xpath, xpath_files, fsep = "/" ) ) )
 
@@ -144,7 +144,7 @@
   
   output_files <- lapply( sort(lst_files), function(x) {
     c( "path" = x,
-       "sha1" = digest::digest( file.path( jresults[["work.area"]], x, sep = "/" ), algo = "sha1", file = TRUE ) )
+       "sha1" = digest::digest( file.path( jresults[["work.area"]], x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   })
   
   
@@ -155,8 +155,8 @@
   
   for ( xout in output_files ) {
     
-    xsrc_path <-  file.path( jresults[["work.area"]],         xout["path"], sep = "/" )
-    xtrgt_path <- file.path( jresults[["working.directory"]], xout["path"], sep = "/" ) 
+    xsrc_path <-  file.path( jresults[["work.area"]],         xout["path"], fsep = "/" )
+    xtrgt_path <- file.path( jresults[["working.directory"]], xout["path"], fsep = "/" ) 
     
     if ( file.exists( xsrc_path ) && 
          ! file.copy( xsrc_path, base::dirname( xtrgt_path ), overwrite = TRUE, recursive = FALSE, copy.mode = FALSE, copy.date = TRUE ) ) 

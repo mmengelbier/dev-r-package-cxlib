@@ -46,7 +46,7 @@ testthat::test_that( "propread.NADefaults", {
 testthat::test_that( "propread.fileNotExist", {
   
   # - stage
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   if ( ! dir.create( test_root, recursive = TRUE ) )
     testthat::fail( "Could not stage test root" )
@@ -57,7 +57,7 @@ testthat::test_that( "propread.fileNotExist", {
   
   
   # - test
-  result <- cxlib::cxlib_propertiesread( file.path( test_root, "idonotexist.properties") )
+  result <- cxlib::cxlib_propertiesread( file.path( test_root, "idonotexist.properties", fsep = "/") )
   
   
   # - assertions
@@ -73,7 +73,7 @@ testthat::test_that( "propread.fileNotExist", {
 testthat::test_that( "propread.simpleCase", {
   
   # - stage
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   if ( ! dir.create( test_root, recursive = TRUE ) )
     testthat::fail( "Could not stage test root" )
@@ -83,7 +83,7 @@ testthat::test_that( "propread.simpleCase", {
   }, add = TRUE )
   
   
-  test_file <- file.path( test_root, "my.properties" )
+  test_file <- file.path( test_root, "my.properties", fsep = "/" )
   
   base::writeLines( c( "A=123", "B=345"), con = test_file, sep = "\n" )
   
@@ -109,7 +109,7 @@ testthat::test_that( "propread.simpleCase", {
 testthat::test_that( "propread.simpleCaseComment", {
   
   # - stage
-  test_root <- base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" )
+  test_root <- cxlib:::.cxlib_standardpath( base::tempfile( pattern = "", tmpdir = base::tempdir(), fileext = "" ) )
   
   if ( ! dir.create( test_root, recursive = TRUE ) )
     testthat::fail( "Could not stage test root" )
@@ -119,7 +119,7 @@ testthat::test_that( "propread.simpleCaseComment", {
   }, add = TRUE )
   
   
-  test_file <- file.path( test_root, "my.properties" )
+  test_file <- file.path( test_root, "my.properties", fsep = "/" )
   
   base::writeLines( c( "A=123", " # B=345", "! B=09309809483", "C=0987654321"), con = test_file, sep = "\n" )
   
