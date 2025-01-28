@@ -385,17 +385,25 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityFailPriorLogNotE
   
   
   
-  for ( xprg in test_programs ) {
+  for ( xprg in test_program_refs ) {
     
+    # program
     base::writeLines( c( "# test program", 
-                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), con = xprg )
+                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), 
+                      con = file.path( wrkdir, xprg, fsep = "/" ) )
     
-    if ( ! file.exists( xprg ) )
+    if ( ! file.exists( file.path( wrkdir, xprg, fsep = "/" ) ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( file.path( wrkdir, xprg, fsep = "/" ), file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
     
+    
+    # create log associated with program
+    base::writeLines( c( "# test log", 
+                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), 
+                      con =  file.path( wrkarea, paste0( tools::file_path_sans_ext(xprg), ".Rout" ), fsep = "/" ) )
+
   }
   
   
@@ -404,7 +412,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityFailPriorLogNotE
           "path" = x,
           "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ), 
           "log" = c( "path" = paste0( tools::file_path_sans_ext( x ), ".Rout"), 
-                     "sha1" = NA,
+                     "sha1" = digest::digest( file.path( wrkarea, paste0( tools::file_path_sans_ext( x ), ".Rout"), fsep = "/"), algo = "sha1", file = TRUE ),
                      "reference.sha1" = NA )
         ) 
   })  
@@ -494,37 +502,41 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityPriorLogExists",
   
   
   
-  for ( xprg in test_programs ) {
+  for ( xprg in test_program_refs ) {
     
-    # program 
-    
+    # program
     base::writeLines( c( "# test program", 
-                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), con = xprg )
+                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), 
+                      con = file.path( wrkdir, xprg, fsep = "/" ) )
     
-    if ( ! file.exists( xprg ) )
+    if ( ! file.exists( file.path( wrkdir, xprg, fsep = "/" ) ) )
       testthat::fail("Could not stage test program in working directory")
     
-    if ( ! file.copy( xprg, file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
+    if ( ! file.copy( file.path( wrkdir, xprg, fsep = "/" ), file.path( wrkarea, test_program_parent, fsep = "/"), recursive = FALSE, copy.date = FALSE, copy.mode = FALSE ) )
       testthat::fail("Could not stage test program in work area")
-
     
-    # prior log
+    
+    # create work area log associated with program
     base::writeLines( c( "# test log", 
-                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ),
-                      con = paste0( tools::file_path_sans_ext(xprg), ".Rout")  )
+                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), 
+                      con =  file.path( wrkarea, paste0( tools::file_path_sans_ext(xprg), ".Rout" ), fsep = "/" ) )
+
+    # create prior log associated with program
+    base::writeLines( c( "# test log", 
+                         paste( sample( c( LETTERS, letters, as.character(0:9) ), 40 ), collapse = "" ) ), 
+                      con =  file.path( wrkdir, paste0( tools::file_path_sans_ext(xprg), ".Rout" ), fsep = "/" ) )
     
-    if ( ! file.exists( paste0( tools::file_path_sans_ext(xprg), ".Rout")  ) )
-      testthat::fail("Could not stage test program log in working directory")
-    
-  }
+        
+  }  
   
+
   
   test_actions <- lapply( test_program_refs, function(x) {
     list( "type" = "program",
           "path" = x,
           "sha1" = digest::digest( file.path( wrkdir, x, fsep = "/" ), algo = "sha1", file = TRUE ), 
           "log" = c( "path" = paste0( tools::file_path_sans_ext( x ), ".Rout"), 
-                     "sha1" = NA,
+                     "sha1" = digest::digest( file.path( wrkarea, paste0( tools::file_path_sans_ext( x ), ".Rout"), fsep = "/"), algo = "sha1", file = TRUE ),
                      "reference.sha1" = digest::digest( file.path( wrkdir, paste0( tools::file_path_sans_ext( x ), ".Rout"), fsep = "/"), algo = "sha1", file = TRUE ) )
     ) 
   })  

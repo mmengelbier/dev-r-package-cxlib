@@ -27,7 +27,8 @@
                     "work.area" = character(0),
                     "actions" = list(), 
                     "inputs" = list(),
-                    "outputs" = list() )
+                    "outputs" = list(),
+                    "deleted" = list())
   
   
   
@@ -58,121 +59,172 @@
   jresults[["work.area"]] <- cxlib:::.cxlib_standardpath( x[["work.area"]] )
   
   
-  
-  # -- futility check for actions ... nothing to process 
-  
-  if ( ! "actions" %in% names(x) ||
-       is.null(x[["actions"]]) ||
-       any(is.na(x[["actions"]])) || 
-       ( class(x[["actions"]]) != "list" ) ||
-       (length(x[["actions"]]) == 0) )
-    return(invisible(jresults))
-  
-  
-  # -- inputs are passed through
-  if ( "inputs" %in% names(x) )
-    jresults[["inputs"]] <- x[["inputs"]]
-    
-    
-  # -- action integrity checks
-  
-  for ( xact in x[["actions"]] ) {
-    # note: using if-blocks for multiple integrity checks on the action record
 
-    # - program
-    
-    if ( all( c( "type", "path", "sha1") %in% names(xact) ) && ( "program" %in% xact[["type"]]) ) {
-      
-      # note: integrity is all equal
-      sha1_hashes <- c( digest::digest( file.path( jresults[["working.directory"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ), 
-                        digest::digest( file.path( jresults[["work.area"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ),
-                        xact[["sha1"]] )
-      
-      
-      if ( length( base::unique( sha1_hashes )) != 1 )
-        stop( "Inegrity check fail for program ", xact[["path"]], ". The program has changed during job execution." )
-      
-    }  # end of program integrity check
-    
-    
-    # - log
-    
-    # note: only valid for program actions
-    # note: only valid if the log exists in the working directory (our source for programs and inputs)
-    # note: we expect reference.sa1 not equal to NA if log file exists (reference.sha1 is SHA-1 for file when program is staged)
-    # note: if reference.sha1 is not NA then compare refrerence.sha1 to log SHA-1 in working directory
-    # note: if log file exists in working directory, refernece.sha1 is NA or do not match SHA-1 then we assume the log has been created/updated
-    # note: log created/updated surrogate for program being executed
-    
-    if ( "type" %in% names(xact) && "program" %in% xact[["type"]] &&
-         "log" %in% names(xact) && all( c( "path", "reference.sha1" ) %in% names(xact[["log"]]) ) &&
-         file.exists( file.path( jresults[["working.directory"]], xact[["log"]]["path"], fsep = "/" ) ) &&
-         ( any(is.na( xact[["log"]]["reference.sha1"] )) || 
-           ( digest::digest( file.path( jresults[["working.directory"]], xact[["log"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ) != xact[["log"]]["reference.sha1"] ) )
-       ) 
-      stop( "Inegrity check fail for program ", xact[["path"]], ". The program log has changed during job execution." )
+  # -- pass-through  
+  
+  for ( xitem in c( "actions", "inputs") )
+    if ( xitem %in% names(x) && ! is.null(x[[xitem]]) && ! any(is.na(x[[xitem]])) && ( class(x[[xitem]]) == "list" ) )
+      jresults[[xitem]] <- x[[xitem]]
+  
 
-
-  } # end of for-statement on actions
   
+  # -- initiate list of files to publish and delete
+  #    note: publish after delete means publish
+  lst_files_publish <- character(0)
+  lst_files_delete <- character(0)
+    
   
+  # -- actions and action integrity checks 
+  #    note: using jresults as a clean list of actions
   
+  if ( "actions" %in% names(jresults) )
+    for ( xact in jresults[["actions"]] ) {
+      # note: using if-blocks for multiple integrity checks on the action record
   
-  # -- identify files to publish 
-  
-  lst_files <- character(0)
-  
-  if ( "outputs" %in% names(x) )
-    for ( xout in x[["outputs"]] ) {
+      # - program
       
-      xpath <- ifelse( ("path" %in% names(xout)), unlist(xout["path"], use.names = FALSE), xout )
-      
-      if ( ! dir.exists( file.path( jresults[["work.area"]], xpath, fsep = "/" ) ) )
-        next()
-
-      # - futility ... make sure we have a valid destination
-      if ( ! dir.exists( file.path( jresults[["working.directory"]], xpath, fsep = "/" ) ) )
-        stop( "The output directory ", xpath, " does not exist in the working directory" )
+      if ( all( c( "type", "path", "sha1") %in% names(xact) ) && ( "program" %in% xact[["type"]]) ) {
         
-            
-      xpath_files <- list.files( file.path( jresults[["work.area"]], xpath, fsep = "/" ), full.names = FALSE, recursive = FALSE, include.dirs = FALSE )
+        # note: integrity is all equal
+        sha1_hashes <- c( digest::digest( file.path( jresults[["working.directory"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ), 
+                          digest::digest( file.path( jresults[["work.area"]], xact[["path"]], fsep = "/"), algo = "sha1", file = TRUE ),
+                          xact[["sha1"]] )
+        
+        
+        if ( length( base::unique( sha1_hashes )) != 1 )
+          stop( "Inegrity check fail for program ", xact[["path"]], ". The program has changed during job execution." )
+        
+      }  # end of program integrity check
+      
+      
+      # - log
+      
+      # note: only valid for program actions
+      # note: only valid if the log exists in the working directory (our source for programs and inputs)
+      
+      if ( "type" %in% names(xact) && "program" %in% xact[["type"]] &&
+           "log" %in% names(xact) && "path" %in% names(xact[["log"]]) &&
+           file.exists( file.path( jresults[["work.area"]], xact[["log"]]["path"], fsep = "/" ) ) ) {
+        
+        # integrity check
+        # note: we expect reference.sa1 not equal to NA if log file exists (reference.sha1 is SHA-1 for file when program is staged)
+        # note: if reference.sha1 is not NA then compare refrerence.sha1 to log SHA-1 in working directory
+        # note: if log file exists in working directory, refernece.sha1 is NA or do not match SHA-1 then we assume the log has been created/updated
+        # note: log created/updated surrogate for program being executed
+        
+        if ( file.exists( file.path( jresults[["working.directory"]], xact[["log"]]["path"], fsep = "/" ) ) &&
+             "reference.sha1" %in% names( xact[["log"]] ) &&
+             ( any(is.na( xact[["log"]]["reference.sha1"] )) || 
+               ( digest::digest( file.path( jresults[["working.directory"]], xact[["log"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ) != xact[["log"]]["reference.sha1"] ) )
+        ) 
+          stop( "Inegrity check fail for program ", xact[["path"]], ". The program log has changed during job execution." )
+        
 
-      lst_files <- base::unique( append( lst_files, file.path( xpath, xpath_files, fsep = "/" ) ) )
+        # include log even if not within outputs
+        lst_files_publish[ unname(xact[["log"]]["path"]) ] <- NA
+        
+        if ( "sha1" %in% names(xact[["log"]]) )
+          lst_files_publish[ unname(xact[["log"]]["path"]) ] <- unname(xact[["log"]]["sha1"])
+                
+      }  # end of if-statement on log in action
+      
+      
 
+      # - files from action
+      
+      if ( ! "audit" %in% names(xact) ) 
+        next()
+      
+      
+      #  note: incrementally build list of files to publish and files to delete
+      #  note: time to keep track of file changes across actions
+      
+      
+      if ( "deleted"  %in% names(xact[["audit"]]) ) 
+        for ( xitem in xact[["audit"]][["deleted"]] ) {
+         
+          lst_files_delete[ unname(xitem["path"]) ] <- unname(xitem["sha1"])
+          
+          lst_files_publish <- lst_files_publish[ ! names(lst_files_publish) %in% names(lst_files_delete) ]
+          
+        } # end of for-statement for files deleted
+        
+        
+      
+      if ( any( c( "created", "updated") %in% names(xact[["audit"]]) ) ) 
+        for ( xitem in xact[["audit"]][ c( "created", "updated") ] ) {
+          
+          # add file to publish list
+          lst_files_publish[ unname(xitem["path"]) ] <- unname(xitem["sha1"])
+          
+          # remove file from delete list if it is there
+          # note: rather use full filter
+          lst_files_delete <-lst_files_delete[ ! names(lst_files_delete) %in% names(lst_files_publish) ]
+
+        } # end of for-statement for files created and updated 
+      
+  
+    } # end of for-statement on actions
+
+
+  
+  # -- integrity check on output files
+  for ( xout in names(lst_files_publish) )
+    if ( digest::digest( file.path( jresults[["work.area"]], xout["path"], fsep = "/" ), algo = "sha1", file = TRUE ) != unname(xout["sha1"]) )
+      stop( "Integrity failure on output ", xout["path"], ". No record of file update." )
+  
+
+  
+  # -- time to finally delete files 
+  for ( xfile in sort(names(lst_files_delete)) ) {
+    
+    xpath <- file.path( jresults[["working.directory"]], xfile, fsep = "/" ) 
+    
+    # delete file
+    if ( file.exists( xpath ) ) {
+      
+      # delete
+      base::unlink( xpath, recursive = FALSE )
+      
+      # verify delete
+      if ( file.exists( xpath ) ) {
+        message( "Unable to delete file ", xpath)
+        next()
+      }
     }
-  
-  
-  output_files <- lapply( sort(lst_files), function(x) {
-    c( "path" = x,
-       "sha1" = digest::digest( file.path( jresults[["work.area"]], x, fsep = "/" ), algo = "sha1", file = TRUE ) )
-  })
-  
-  
+    
+    
+    # add record of deleted file 
+    jresults[["deleted"]][[ length(jresults[["deleted"]]) + 1 ]] <- c( "path" = xfile,
+                                                                       "sha1" = lst_files_delete[xfile] )
+    
+  }
+    
 
   
-  
-  # -- time to finally publish 
-  
-  for ( xout in output_files ) {
-    
-    xsrc_path <-  file.path( jresults[["work.area"]],         xout["path"], fsep = "/" )
-    xtrgt_path <- file.path( jresults[["working.directory"]], xout["path"], fsep = "/" ) 
-    
-    if ( file.exists( xsrc_path ) && 
-         ! file.copy( xsrc_path, base::dirname( xtrgt_path ), overwrite = TRUE, recursive = FALSE, copy.mode = FALSE, copy.date = TRUE ) ) 
-      stop( "Could not publish file ", xout["path"], " in the working directory" )
-    
-    
-    if ( digest::digest( xtrgt_path, algo = "sha1", file = TRUE ) != unname(xout["sha1"]) )
-      stop( "Unequal SHA-1 digests for published file ", xout["path"], " in the working directory" )
-    
-    
-    # add to jresults
-    jresults[["outputs"]][[ length(jresults[["outputs"]]) + 1 ]] <- xout
+  # -- time to finally publish files
+  for ( xfile in sort(names(lst_files_publish)) ) {
+
+    xpath_src <- file.path( jresults[["work.area"]], xfile, fsep = "/" )
+    xpath_target <- file.path( jresults[["working.directory"]], xfile, fsep = "/" ) 
+
+    # copy file
+    if ( ! file.copy( xpath_src, base::dirname(xpath_target), recursive = FALSE, overwrite = TRUE, copy.mode = FALSE, copy.date = TRUE ) ||
+         ( digest::digest( xpath_target, algo = "sha1", file = TRUE ) != lst_files_publish[xfile] ) ) {
+      
+      message( "Unable to save file as ", xpath_target )
+      
+      next()
+    }
+
+
+    # add record of deleted file
+    jresults[["outputs"]][[ length(jresults[["outputs"]]) + 1 ]] <- c( "path" = xfile,
+                                                                       "sha1" = lst_files_publish[xfile] )
 
   }
-  
 
+  
   
   return(invisible(jresults))
 }

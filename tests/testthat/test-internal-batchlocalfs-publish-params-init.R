@@ -392,7 +392,8 @@ testthat::test_that( "batchlocalfs.publishJobActionsMissing", {
                             "work.area" = wrkarea,
                             "actions" = list(), 
                             "inputs" = list(),
-                            "outputs" = list() )
+                            "outputs" = list(), 
+                            "deleted" = list() )
   
   # -- assertions
   testthat::expect_equal( result, expected_jresult )
@@ -450,7 +451,8 @@ testthat::test_that( "batchlocalfs.publishJobActionsNull", {
                             "work.area" = wrkarea,
                             "actions" = list(), 
                             "inputs" = list(),
-                            "outputs" = list() )
+                            "outputs" = list(), 
+                            "deleted" = list() )
   
   # -- assertions
   testthat::expect_equal( result, expected_jresult )
@@ -509,7 +511,8 @@ testthat::test_that( "batchlocalfs.publishJobActionsNA", {
                             "work.area" = wrkarea,
                             "actions" = list(), 
                             "inputs" = list(),
-                            "outputs" = list() )
+                            "outputs" = list(), 
+                            "deleted" = list() )
   
   # -- assertions
   testthat::expect_equal( result, expected_jresult )
@@ -567,7 +570,8 @@ testthat::test_that( "batchlocalfs.publishJobActionsNotList", {
                             "work.area" = wrkarea,
                             "actions" = list(), 
                             "inputs" = list(),
-                            "outputs" = list() )
+                            "outputs" = list(), 
+                            "deleted" = list() )
   
   # -- assertions
   testthat::expect_equal( result, expected_jresult )
@@ -627,7 +631,8 @@ testthat::test_that( "batchlocalfs.publishJobActionsEmptytList", {
                             "work.area" = wrkarea,
                             "actions" = list(), 
                             "inputs" = list(),
-                            "outputs" = list() )
+                            "outputs" = list(), 
+                            "deleted" = list() )
   
   # -- assertions
   testthat::expect_equal( result, expected_jresult )
