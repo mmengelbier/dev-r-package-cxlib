@@ -562,3 +562,4 @@ testthat::test_that( "batchlocalfs.publishJobActionsLogIntegrityPriorLogExists",
                           regexp = paste0("^Inegrity check fail for program ", test_actions[[ length(test_actions) ]][["path"]], ". The program log has changed during job execution.$") )
   
 })
+

@@ -22,7 +22,7 @@
                 "work.area" = character(0),
                 "actions" = list(),
                 "inputs" = list(),
-                "outputs" = character(0)
+                "output.locations" = character(0)
               )
   
 
@@ -240,7 +240,7 @@
         if ( ! dir.exists( xpath ) && ! dir.create( xpath, recursive = TRUE ) )
           stop( "Could not stage output path ", xoutput )
         
-        jdef[["outputs"]] <- base::unique( append( jdef[["outputs"]], cxlib:::.cxlib_standardpath( xoutput ) ) )
+        jdef[["output.locations"]] <- base::unique( append( jdef[["output.locations"]], cxlib:::.cxlib_standardpath( xoutput ) ) )
       }
     
     
@@ -278,7 +278,7 @@
   input_names <- names( jdef[["inputs"]] )
   jdef[["inputs"]] <- unname( jdef[["inputs"]][ sort(input_names) ] )
   
-  jdef[["outputs"]] <- base::unique( base::sort( jdef[["outputs"]] ) )
+  jdef[["output.locations"]] <- base::unique( base::sort( jdef[["output.locations"]] ) )
   
   
   return(invisible( jdef ))

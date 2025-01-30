@@ -183,27 +183,26 @@ testthat::test_that( "programexec.programLog", {
                           "updated" = list(), "deleted" = list() )
   
   
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = list( expected_log ),
+                           "files.updated" = list(),
+                           "files.deleted" = list() )  
+  
   
   # -- assertions
 
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
-
+  # result  
+  testthat::expect_equal( result, expected_result )
+  
   # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
   testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/") ) ) 
 
   # verify test reference is in log
   log_lines <- base::readLines( con = result[["log"]][["path"]] )
   testthat::expect_true( any( base::startsWith( log_lines, paste0( "--->", test_reference, "<---" ) )) )
 
-  
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )  
-  
 
 })
 
@@ -273,26 +272,29 @@ testthat::test_that( "programexec.workareaNull", {
   
   
   
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = list( expected_log ),
+                           "files.updated" = list(),
+                           "files.deleted" = list() )  
+  
+  
+  
   # -- assertions
   
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
+  # result  
+  testthat::expect_equal( result, expected_result )
+
   
-  # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
+  # # log
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) )
 
   # verify test reference is in log
   log_lines <- base::readLines( con = result[["log"]][["path"]] )
   testthat::expect_true( any( base::startsWith( log_lines, paste0( "--->", test_root, "<---" ) )) )
 
-  
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )  
-  
+
 })
 
 
@@ -529,29 +531,30 @@ testthat::test_that( "programexec.workareaNotWorkdirWorkarea", {
   expected_log <- c( "path" = paste0( tools::file_path_sans_ext( test_program_ref ), ".Rout"), 
                      "sha1" = digest::digest( paste0( tools::file_path_sans_ext( test_program ), ".Rout"), algo = "sha1", file = TRUE) )
   
-  expected_audit <- list( "inputs" = list( expected_program ),
-                          "created" = list( expected_log ), 
-                          "updated" = list(), "deleted" = list() )
-  
 
+  
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = list( expected_log ),
+                           "files.updated" = list(),
+                           "files.deleted" = list() )  
+  
+  
+  
   # -- assertions
   
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
+  # result  
+  testthat::expect_equal( result, expected_result )
   
+
   # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
   testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
 
   # verify test reference is in log
   log_lines <- base::readLines( con = file.path(test_root, result[["log"]][["path"]], fsep = "/") )
   testthat::expect_true( any( base::startsWith( log_lines, paste0( "--->", test_root, "<---" ) )) )
 
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
 
 })
 

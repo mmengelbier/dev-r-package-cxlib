@@ -45,10 +45,10 @@
   
   exec_result <- list( "program" = character(0),
                        "log" = character(0),
-                       "audit" = list( "inputs" = list(),
-                                       "created" = list(),
-                                       "updated" = list(),
-                                       "deleted" = list() )
+                       "files.input" = list(),
+                       "files.created" = list(),
+                       "files.updated" = list(),
+                       "files.deleted" = list() 
                     )
  
   
@@ -112,7 +112,7 @@
   # -- audit details
   
   # - inputs
-  exec_result[["audit"]][["inputs"]] <- lapply( sort(names(pre_inv)), function(z) {
+  exec_result[["files.input"]] <- lapply( sort(names(pre_inv)), function(z) {
     c( "path" = z, "sha1" = unname(pre_inv[z]) )
   } )
   
@@ -120,7 +120,7 @@
   # - created
   created <- post_inv[ ! names(post_inv) %in% names(pre_inv) ]
   
-  exec_result[["audit"]][["created"]] <- lapply( sort(names(created)), function(z) {
+  exec_result[["files.created"]] <- lapply( sort(names(created)), function(z) {
     c( "path" = z, "sha1" = unname(created[z]) )
   } )
   
@@ -136,7 +136,7 @@
   }), use.names = FALSE )  
   
   
-  exec_result[["audit"]][["updated"]] <- lapply( sort(updated_files), function(z) {
+  exec_result[["files.updated"]] <- lapply( sort(updated_files), function(z) {
     c( "path" = z, "sha1" = unname(post_inv[z]) )
   })
   
@@ -144,7 +144,7 @@
   # - deleted
   deleted <- pre_inv[ ! names(pre_inv) %in% names(post_inv) ]
   
-  exec_result[["audit"]][["deleted"]] <- lapply( sort(names(deleted)), function(z) {
+  exec_result[["files.deleted"]] <- lapply( sort(names(deleted)), function(z) {
     c( "path" = z, "sha1" = unname(deleted[z]) )
   } )
   

@@ -25,6 +25,7 @@
   jresults <- list( "mode" = "localfs", 
                     "working.directory" = character(0),
                     "work.area" = character(0),
+                    "output.locations" = character(0),
                     "actions" = list(), 
                     "inputs" = list(),
                     "outputs" = list(),
@@ -62,25 +63,27 @@
 
   # -- pass-through  
   
-  for ( xitem in c( "actions", "inputs") )
+  for ( xitem in c( "actions", "inputs" ) )
     if ( xitem %in% names(x) && ! is.null(x[[xitem]]) && ! any(is.na(x[[xitem]])) && ( class(x[[xitem]]) == "list" ) )
-      jresults[[xitem]] <- x[[xitem]]
+      jresults[xitem] <- x[xitem]
+  
+  if ( "output.locations" %in% names(x) && ! is.null(x[["output.locations"]]) && ! any(is.na(x[["output.locations"]])) && ( class(x[["output.locations"]]) == "character" ) )
+    jresults["output.locations"] <- x["output.locations"]
   
 
-  
   # -- initiate list of files to publish and delete
   #    note: publish after delete means publish
   lst_files_publish <- character(0)
   lst_files_delete <- character(0)
-    
   
+
   # -- actions and action integrity checks 
   #    note: using jresults as a clean list of actions
-  
+
   if ( "actions" %in% names(jresults) )
     for ( xact in jresults[["actions"]] ) {
       # note: using if-blocks for multiple integrity checks on the action record
-  
+      
       # - program
       
       if ( all( c( "type", "path", "sha1") %in% names(xact) ) && ( "program" %in% xact[["type"]]) ) {
@@ -131,17 +134,13 @@
       
 
       # - files from action
-      
-      if ( ! "audit" %in% names(xact) ) 
-        next()
-      
-      
+
       #  note: incrementally build list of files to publish and files to delete
       #  note: time to keep track of file changes across actions
       
       
-      if ( "deleted"  %in% names(xact[["audit"]]) ) 
-        for ( xitem in xact[["audit"]][["deleted"]] ) {
+      if ( "files.deleted"  %in% names(xact) ) 
+        for ( xitem in xact[["files.deleted"]] ) {
          
           lst_files_delete[ unname(xitem["path"]) ] <- unname(xitem["sha1"])
           
@@ -149,54 +148,61 @@
           
         } # end of for-statement for files deleted
         
-        
-      
-      if ( any( c( "created", "updated") %in% names(xact[["audit"]]) ) ) 
-        for ( xitem in xact[["audit"]][ c( "created", "updated") ] ) {
-          
-          # add file to publish list
-          lst_files_publish[ unname(xitem["path"]) ] <- unname(xitem["sha1"])
-          
-          # remove file from delete list if it is there
-          # note: rather use full filter
-          lst_files_delete <-lst_files_delete[ ! names(lst_files_delete) %in% names(lst_files_publish) ]
 
-        } # end of for-statement for files created and updated 
+      for ( xfile_action in c( "files.created", "files.updated" ) )  
+        if ( xfile_action %in% names(xact) )
+          for ( xitem in xact[[ xfile_action ]] ) {
+
+            # add file to publish list
+            lst_files_publish[ unname(xitem["path"]) ] <- unname(xitem["sha1"])
+            
+            # remove file from delete list if it is there
+            # note: rather use full filter
+            lst_files_delete <-lst_files_delete[ ! names(lst_files_delete) %in% names(lst_files_publish) ]
+  
+          } # end of for-statement for files created and updated 
       
   
     } # end of for-statement on actions
 
 
-  
+
+
   # -- integrity check on output files
   for ( xout in names(lst_files_publish) )
-    if ( digest::digest( file.path( jresults[["work.area"]], xout["path"], fsep = "/" ), algo = "sha1", file = TRUE ) != unname(xout["sha1"]) )
-      stop( "Integrity failure on output ", xout["path"], ". No record of file update." )
+    if ( digest::digest( file.path( jresults[["work.area"]], xout, fsep = "/" ), algo = "sha1", file = TRUE ) != unname(lst_files_publish[xout]) )
+      stop( "Integrity failure on output ", xout, ". No record of file update." )
   
 
   
   # -- time to finally delete files 
   for ( xfile in sort(names(lst_files_delete)) ) {
     
+    # disregard file if not in a known output location
+    if ( ! base::dirname( xfile ) %in% jresults[["output.locations"]] )
+      next()
+
+        
     xpath <- file.path( jresults[["working.directory"]], xfile, fsep = "/" ) 
     
     # delete file
+    if ( ! file.exists( xpath ) ) 
+      next()
+
+          
+    # delete
+    base::unlink( xpath, recursive = FALSE )
+    
+    # verify delete
     if ( file.exists( xpath ) ) {
-      
-      # delete
-      base::unlink( xpath, recursive = FALSE )
-      
-      # verify delete
-      if ( file.exists( xpath ) ) {
-        message( "Unable to delete file ", xpath)
-        next()
-      }
+      message( "Unable to delete file ", xpath)
+      next()
     }
-    
-    
+
+        
     # add record of deleted file 
     jresults[["deleted"]][[ length(jresults[["deleted"]]) + 1 ]] <- c( "path" = xfile,
-                                                                       "sha1" = lst_files_delete[xfile] )
+                                                                       "sha1" = unname(lst_files_delete[xfile]) )
     
   }
     
@@ -205,6 +211,11 @@
   # -- time to finally publish files
   for ( xfile in sort(names(lst_files_publish)) ) {
 
+    # disregard file if not in a known output location
+    if ( ! base::dirname( xfile ) %in% jresults[["output.locations"]] )
+      next()
+    
+    
     xpath_src <- file.path( jresults[["work.area"]], xfile, fsep = "/" )
     xpath_target <- file.path( jresults[["working.directory"]], xfile, fsep = "/" ) 
 
@@ -220,7 +231,7 @@
 
     # add record of deleted file
     jresults[["outputs"]][[ length(jresults[["outputs"]]) + 1 ]] <- c( "path" = xfile,
-                                                                       "sha1" = lst_files_publish[xfile] )
+                                                                       "sha1" = unname(lst_files_publish[xfile]) )
 
   }
 

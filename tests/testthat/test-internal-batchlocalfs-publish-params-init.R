@@ -385,11 +385,12 @@ testthat::test_that( "batchlocalfs.publishJobActionsMissing", {
   # -- test
   result <- cxlib:::.cxlib_batch_localfs_publish( test_execresult )
   
-  
+
   # -- expected
   expected_jresult <- list( "mode" = "localfs",
                             "working.directory" = wrkdir, 
                             "work.area" = wrkarea,
+                            "output.locations" = character(0),
                             "actions" = list(), 
                             "inputs" = list(),
                             "outputs" = list(), 
@@ -449,6 +450,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsNull", {
   expected_jresult <- list( "mode" = "localfs",
                             "working.directory" = wrkdir, 
                             "work.area" = wrkarea,
+                            "output.locations" = character(0),
                             "actions" = list(), 
                             "inputs" = list(),
                             "outputs" = list(), 
@@ -509,6 +511,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsNA", {
   expected_jresult <- list( "mode" = "localfs",
                             "working.directory" = wrkdir, 
                             "work.area" = wrkarea,
+                            "output.locations" = character(0),
                             "actions" = list(), 
                             "inputs" = list(),
                             "outputs" = list(), 
@@ -568,6 +571,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsNotList", {
   expected_jresult <- list( "mode" = "localfs",
                             "working.directory" = wrkdir, 
                             "work.area" = wrkarea,
+                            "output.locations" = character(0),
                             "actions" = list(), 
                             "inputs" = list(),
                             "outputs" = list(), 
@@ -629,6 +633,7 @@ testthat::test_that( "batchlocalfs.publishJobActionsEmptytList", {
   expected_jresult <- list( "mode" = "localfs",
                             "working.directory" = wrkdir, 
                             "work.area" = wrkarea,
+                            "output.locations" = character(0),
                             "actions" = list(), 
                             "inputs" = list(),
                             "outputs" = list(), 

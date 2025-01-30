@@ -72,8 +72,8 @@ testthat::test_that( "batchlocalfs-output.programNoOutput", {
   
   
   # no input annotation
-  testthat::expect_true( "outputs" %in% names(result) )
-  testthat::expect_length( result[["outputs"]], 0 )  
+  testthat::expect_true( "output.locations" %in% names(result) )
+  testthat::expect_length( result[["output.locations"]], 0 )  
   
 })
 
@@ -220,8 +220,8 @@ testthat::test_that( "batchlocalfs-output.programOutput", {
   
   
   # output annotations
-  testthat::expect_true( "outputs" %in% names(result) )
-  testthat::expect_equal( result[["outputs"]], expected_outputs )
+  testthat::expect_true( "output.locations" %in% names(result) )
+  testthat::expect_equal( result[["output.locations"]], expected_outputs )
   
 })
 
@@ -318,8 +318,8 @@ testthat::test_that( "batchlocalfs-output.programMultipleOutputs", {
   
   
   # output annotations
-  testthat::expect_true( "outputs" %in% names(result) )
-  testthat::expect_equal( result[["outputs"]], expected_outputs )
+  testthat::expect_true( "output.locations" %in% names(result) )
+  testthat::expect_equal( result[["output.locations"]], expected_outputs )
   
 })
 
@@ -447,8 +447,8 @@ testthat::test_that( "batchlocalfs-output.multiProgramMultipleOutputs", {
   
   
   # output annotations
-  testthat::expect_true( "outputs" %in% names(result) )
-  testthat::expect_equal( result[["outputs"]], expected_outputs )
+  testthat::expect_true( "output.locations" %in% names(result) )
+  testthat::expect_equal( result[["output.locations"]], expected_outputs )
   
 })
 
