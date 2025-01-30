@@ -102,33 +102,26 @@ testthat::test_that( "programexec.auditUpdated", {
   expected_updated <- list( c( "path" = file.path( test_output_parent_ref, "output.txt", fsep = "/"), 
                                "sha1" = digest::digest( file.path( test_root, test_output_parent_ref, "output.txt", fsep = "/"), algo = "sha1", file = TRUE ) ) )
   
-  
-  expected_audit <- list( "inputs" = expected_inputs,
-                          "created" = expected_created, 
-                          "updated" = expected_updated, 
-                          "deleted" = list() )
-  
 
+
+  
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = expected_inputs,
+                           "files.created" = expected_created,
+                           "files.updated" = expected_updated,
+                           "files.deleted" = list() )  
+  
   # -- assertions
   
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
-  
-  # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
-  
+  # result  
+  testthat::expect_equal( result, expected_result )
+
   # verify test reference is in output
   output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
   testthat::expect_true( any( output_lines == test_reference ) )
   
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
-  
+
 })
 
 
@@ -256,30 +249,25 @@ testthat::test_that( "programexec.auditMultiUpdated", {
        "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE) )
   })
   
-  
 
-  expected_audit <- list( "inputs" = expected_inputs,
-                          "created" = expected_created,
-                          "updated" = expected_updated,
-                          "deleted" = list() )
-
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = expected_inputs,
+                           "files.created" = expected_created,
+                           "files.updated" = expected_updated,
+                           "files.deleted" = list() )  
 
   # -- assertions
 
-  # program
-  testthat::expect_true( "program" %in% names(result) )
-  testthat::expect_equal( result[["program"]], expected_program )
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
-
-  # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) )
-
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
+  # result  
+  testthat::expect_equal( result, expected_result )
   
+  
+  # program
+  testthat::expect_equal( unname(result[["program"]]["sha1"]),
+                          digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ) )
+
+
   # expected output files have been updated
   for ( xpath in test_files_to_be_updated )
     testthat::expect_false( ( digest::digest( file.path( test_root, xpath, fsep = "/"), algo = "sha1", file = TRUE ) == ref_sha1[ xpath ] ) )

@@ -59,7 +59,7 @@ testthat::test_that( "programexec.auditCreated", {
   
   # -- test
   result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
-  
+
  
   # -- expected
   expected_program <- c( "path" = test_program_ref, 
@@ -77,30 +77,28 @@ testthat::test_that( "programexec.auditCreated", {
   }) 
   
   
-  expected_audit <- list( "inputs" = list( expected_program ),
-                          "created" = expected_created, 
-                          "updated" = list(), "deleted" = list() )
+  
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = expected_created,
+                           "files.updated" = list(),
+                           "files.deleted" = list() )
   
 
   # -- assertions
-  
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
-  
+
+  # result  
+  testthat::expect_equal( result, expected_result )
+
   # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/" ) ) ) 
-  
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/" ) ) )
+
   # verify test reference is in output
   output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
   testthat::expect_true( any( output_lines == test_reference ) )
   
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
-  
+
 })
 
 
@@ -195,28 +193,21 @@ testthat::test_that( "programexec.auditMultiCreated", {
        "sha1" = digest::digest( file.path(test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
   }) 
   
-  
-  expected_audit <- list( "inputs" = list( expected_program ),
-                          "created" = expected_created, 
-                          "updated" = list(), "deleted" = list() )
-  
 
+  
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = expected_created,
+                           "files.updated" = list(),
+                           "files.deleted" = list() )  
+  
   # -- assertions
-  
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
-  
-  # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/") ) ) 
 
+  # result  
+  testthat::expect_equal( result, expected_result )
   
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
-  
+
 })
 
 
@@ -319,26 +310,19 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
   }) 
   
   
-  expected_audit <- list( "inputs" = list( expected_program ),
-                          "created" = expected_created, 
-                          "updated" = list(), "deleted" = list() )
   
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = list( expected_program ),
+                           "files.created" = expected_created,
+                           "files.updated" = list(),
+                           "files.deleted" = list() )  
   
   # -- assertions
   
-  # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
+  # result  
+  testthat::expect_equal( result, expected_result )
   
-  # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
-  
-  
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
   
 })
 

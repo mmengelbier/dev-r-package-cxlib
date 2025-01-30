@@ -105,32 +105,32 @@ testthat::test_that( "programexec.auditDeleted", {
   expected_deleted <- list( c( "path" = file.path( test_output_parent_ref, "output.txt", fsep = "/" ),
                                "sha1" = unname(ref_sha1[ file.path( test_output_parent_ref, "output.txt", fsep = "/" ) ]) ) )
   
-  expected_audit <- list( "inputs" = expected_inputs,
-                          "created" = expected_created, 
-                          "updated" = expected_updated, 
-                          "deleted" = expected_deleted )
+
+  
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = expected_inputs,
+                           "files.created" = expected_created,
+                           "files.updated" = expected_updated,
+                           "files.deleted" = expected_deleted )   
   
   
   # -- assertions
   
+  # result  
+  testthat::expect_equal( result, expected_result )
+
   # program
-  testthat::expect_true( "program" %in% names(result) )  
-  testthat::expect_equal( result[["program"]], expected_program ) 
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
-  
+  testthat::expect_equal( unname(result[["program"]]["sha1"]),
+                          digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ) )
+
   # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
-  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) ) 
+  testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) )
 
   # deleted file
   testthat::expect_false( file.exists( file.path( test_root, test_output_parent_ref, "output.txt", fsep = "/" )))
 
 
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
-  
 })
 
 
@@ -265,34 +265,32 @@ testthat::test_that( "programexec.auditMultiDeleted", {
   })
   
   
+
+  expected_result <- list( "program" = expected_program,
+                           "log" = expected_log,
+                           "files.input" = expected_inputs,
+                           "files.created" = expected_created,
+                           "files.updated" = expected_updated,
+                           "files.deleted" = expected_deleted )   
   
-  expected_audit <- list( "inputs" = expected_inputs,
-                          "created" = expected_created,
-                          "updated" = expected_updated,
-                          "deleted" = expected_deleted )
+  
   
   
   # -- assertions
+
+  # result  
+  testthat::expect_equal( result, expected_result )
   
   # program
-  testthat::expect_true( "program" %in% names(result) )
-  testthat::expect_equal( result[["program"]], expected_program )
-  testthat::expect_equal( digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ), unname(result[["program"]]["sha1"]) )
+  testthat::expect_equal( unname(result[["program"]]["sha1"]),
+                          digest::digest( file.path( test_root, result[["program"]]["path"], fsep = "/" ), algo = "sha1", file = TRUE ) )
   
   # log
-  testthat::expect_true( "log" %in% names(result) )
-  testthat::expect_equal( result[["log"]], expected_log )
   testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/")) )
-
   
+
   # deleted
   testthat::expect_false( any( file.exists( file.path( test_root, test_files_to_be_deleted, fsep = "/") ) ) )
     
-  # audit
-  testthat::expect_true( "audit" %in% names(result) )
-  testthat::expect_equal( result[["audit"]], expected_audit )
-  
 
-  
-  
 })
