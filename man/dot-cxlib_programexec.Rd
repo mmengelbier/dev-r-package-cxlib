@@ -4,7 +4,7 @@
 \alias{.cxlib_programexec}
 \title{Internal utility function to execute a R program in batch}
 \usage{
-.cxlib_programexec(x, work.area = NULL)
+.cxlib_programexec(x, options = NULL)
 }
 \arguments{
 \item{x}{Program file}

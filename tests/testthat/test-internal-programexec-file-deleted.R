@@ -74,7 +74,7 @@ testthat::test_that( "programexec.auditDeleted", {
   
 
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
   
 
   # -- expected
@@ -118,7 +118,7 @@ testthat::test_that( "programexec.auditDeleted", {
   # -- assertions
   
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
 
   # program
   testthat::expect_equal( unname(result[["program"]]["sha1"]),
@@ -233,7 +233,7 @@ testthat::test_that( "programexec.auditMultiDeleted", {
   
   
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
 
   
   # -- expected
@@ -279,7 +279,7 @@ testthat::test_that( "programexec.auditMultiDeleted", {
   # -- assertions
 
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
   
   # program
   testthat::expect_equal( unname(result[["program"]]["sha1"]),

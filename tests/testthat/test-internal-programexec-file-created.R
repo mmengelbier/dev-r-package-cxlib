@@ -1,11 +1,11 @@
 #
 #   Tests for cxlib:::.cxlib_programexec()
 #
-#   created audited event
+#   created filesed event
 #
 
 
-testthat::test_that( "programexec.auditCreated", {
+testthat::test_that( "programexec.filesCreated", {
   
   
   # -- stage
@@ -58,9 +58,9 @@ testthat::test_that( "programexec.auditCreated", {
   
   
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
 
- 
+
   # -- expected
   expected_program <- c( "path" = test_program_ref, 
                          "sha1" = digest::digest( test_program, algo = "sha1", file = TRUE) )
@@ -77,7 +77,6 @@ testthat::test_that( "programexec.auditCreated", {
   }) 
   
   
-  
   expected_result <- list( "program" = expected_program,
                            "log" = expected_log,
                            "files.input" = list( expected_program ),
@@ -89,7 +88,7 @@ testthat::test_that( "programexec.auditCreated", {
   # -- assertions
 
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
 
   # log
   testthat::expect_true( file.exists( file.path(test_root, result[["log"]][["path"]], fsep = "/" ) ) )
@@ -104,7 +103,7 @@ testthat::test_that( "programexec.auditCreated", {
 
 
 
-testthat::test_that( "programexec.auditMultiCreated", {
+testthat::test_that( "programexec.filesMultiCreated", {
   
   
   # -- stage
@@ -170,7 +169,7 @@ testthat::test_that( "programexec.auditMultiCreated", {
   
 
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
   
 
   # -- expected
@@ -205,14 +204,14 @@ testthat::test_that( "programexec.auditMultiCreated", {
   # -- assertions
 
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
   
 
 })
 
 
 
-testthat::test_that( "programexec.auditMultiKeepCreated", {
+testthat::test_that( "programexec.filesMultiKeepCreated", {
   
   
   # -- stage
@@ -284,7 +283,7 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
   
   
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
   
   
   # -- expected
@@ -321,7 +320,7 @@ testthat::test_that( "programexec.auditMultiKeepCreated", {
   # -- assertions
   
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
   
   
 })

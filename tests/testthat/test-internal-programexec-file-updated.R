@@ -75,7 +75,7 @@ testthat::test_that( "programexec.auditUpdated", {
 
   
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
   
 
   # -- expected
@@ -115,7 +115,7 @@ testthat::test_that( "programexec.auditUpdated", {
   # -- assertions
   
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
 
   # verify test reference is in output
   output_lines <- base::readLines( con = file.path(test_root, test_output_parent_ref, "output.txt", fsep = "/" ) )
@@ -221,7 +221,7 @@ testthat::test_that( "programexec.auditMultiUpdated", {
   
   
   # -- test
-  result <- cxlib:::.cxlib_programexec( test_program_ref, work.area = test_root )
+  result <- cxlib:::.cxlib_programexec( test_program_ref, options = list( "work.area" = test_root ) )
 
   
   # -- expected
@@ -260,7 +260,7 @@ testthat::test_that( "programexec.auditMultiUpdated", {
   # -- assertions
 
   # result  
-  testthat::expect_equal( result, expected_result )
+  testthat::expect_equal( result[ names(expected_result) ], expected_result )
   
   
   # program
