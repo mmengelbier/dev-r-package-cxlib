@@ -47,7 +47,7 @@ testthat::test_that( "batch.localSingleProgram", {
       stop( "Could not stage test program parent directory" )
   
   
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) )
   
   pgm <- c( "# test program",
             paste0( "cat( \"--->", test_reference, "<---\", sep = \"\")") )
@@ -144,7 +144,7 @@ testthat::test_that( "batch.localSingleProgramAltLog", {
     stop( "Could not stage test program parent directory" )
   
   
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) )
   
   pgm <- c( "# test program",
             paste0( "cat( \"--->", test_reference, "<---\", sep = \"\")") )
@@ -240,7 +240,7 @@ testthat::test_that( "batch.localSingleProgramAltLogDir", {
     stop( "Could not stage test program parent directory" )
   
   
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) )
   
   pgm <- c( "# test program",
             paste0( "cat( \"--->", test_reference, "<---\", sep = \"\")") )
@@ -345,7 +345,7 @@ testthat::test_that( "batch.localSingleProgramAltLogDirLogSuffix", {
     stop( "Could not stage test program parent directory" )
   
   
-  test_program <- base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" )
+  test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) )
   
   pgm <- c( "# test program",
             paste0( "cat( \"--->", test_reference, "<---\", sep = \"\")") )
@@ -513,7 +513,7 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
 
   for ( xcontext in c( "random", "create", "update", "delete") )
     test_programs <- append( test_programs, 
-                             base::tempfile( pattern = paste0( "test-program-", xcontext, "-"), tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) )
+                             base::gsub( "\\\\", "/", base::tempfile( pattern = paste0( "test-program-", xcontext, "-"), tmpdir = file.path( test_root, test_program_parent, fsep = "/" ), fileext = ".R" ) ) )
   
   
   #   program 1:  random string in log
