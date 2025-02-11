@@ -4,7 +4,7 @@ Version: 0.1.0
 Authors@R: 
     person("Magnus", "Mengelbier", , "magnus.mengelbier@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8673-7625"))
-Imports: base, tools, digest (>= 0.6.37), callr (>= 3.7.6)
+Imports: base, tools, digest (>= 0.6.37), callr (>= 3.7.6), uuid (>= 1.2-0)
 Description: Collection of R utilities, functions and object for library management, setup, configuration and interacting with data and analysis in Life Science GxP and regulated environments.
 License: `use_apache()`
 Encoding: UTF-8
