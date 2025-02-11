@@ -1,2 +1,4 @@
 ^cxlib\.Rproj$
 ^\.Rproj\.user$
+^README
+^.gitignore$
