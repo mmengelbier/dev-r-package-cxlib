@@ -43,7 +43,7 @@
   
   # -- check for program
   
-  if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || (class(x) != "character") )
+  if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || ! inherits( x, "character") )
     stop( "The program is not specified or as specified invalid" )
   
   if ( ! file.exists( file.path( work_area, x, fsep = "/" ) ) )
@@ -68,7 +68,7 @@
  
   
   # -- spec job reference
-  if ( ! is.null( job.id ) && ! any(is.na(job.id)) && (class(job.id) == "character") )
+  if ( ! is.null( job.id ) && ! any(is.na(job.id)) && inherits( job.id, "character") )
     exec_result[["job.id"]] <- job.id
   
   

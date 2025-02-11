@@ -27,7 +27,7 @@
   
   annotations <- list()
   
-  if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || (class(x) != "character") )
+  if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || ! inherits( x, "character") )
     stop( "Missing or invalid program file reference" )
   
   if ( ! file.exists(x) )

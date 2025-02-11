@@ -48,7 +48,7 @@
 
   
   # -- if no program files .. return empty job
-  if ( missing(x) || is.null(x) || ( length(x) == 0 ) || any(is.na(x)) || ( class(x) != "character" ) )
+  if ( missing(x) || is.null(x) || ( length(x) == 0 ) || any(is.na(x)) || ! inherits(x, "character" ) )
     return(jdef)
   
   

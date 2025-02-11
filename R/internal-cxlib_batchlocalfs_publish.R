@@ -10,7 +10,7 @@
 .cxlib_batch_localfs_publish <- function( x ) {
 
   
-  if ( missing(x) || is.null(x) || ( class(x) != "list" ) )
+  if ( missing(x) || is.null(x) || ! inherits(x, "list") )
     stop( "Invalid job results" )
   
   if ( length(x) == 0 ) 
@@ -38,7 +38,7 @@
   if ( ! "working.directory" %in% names(x) || 
        is.null(x[["working.directory"]]) ||
        any(is.na(x[["working.directory"]])) ||
-       ( class(x[["working.directory"]]) != "character" ) ||
+       ! inherits( x[["working.directory"]], "character" ) ||
        ( length(x[["working.directory"]]) != 1 ) || 
        ! dir.exists( x[["working.directory"]] ) )
     stop( "Working directory in job results is missing or invalid" )
@@ -52,7 +52,7 @@
   if ( ! "work.area" %in% names(x) || 
        is.null(x[["work.area"]]) ||
        any(is.na(x[["work.area"]])) || 
-       ( class(x[["work.area"]]) != "character" ) ||
+       ! inherits( x[["work.area"]], "character" ) ||
        ( length(x[["work.area"]]) != 1 ) || 
        ! dir.exists( x[["work.area"]] ) )
     stop( "Work area in job results is missing or invalid" )
@@ -64,10 +64,10 @@
   # -- pass-through  
   
   for ( xitem in c( "actions", "inputs" ) )
-    if ( xitem %in% names(x) && ! is.null(x[[xitem]]) && ! any(is.na(x[[xitem]])) && ( class(x[[xitem]]) == "list" ) )
+    if ( xitem %in% names(x) && ! is.null(x[[xitem]]) && ! any(is.na(x[[xitem]])) && inherits( x[[xitem]], "list" ) )
       jresults[xitem] <- x[xitem]
   
-  if ( "output.locations" %in% names(x) && ! is.null(x[["output.locations"]]) && ! any(is.na(x[["output.locations"]])) && ( class(x[["output.locations"]]) == "character" ) )
+  if ( "output.locations" %in% names(x) && ! is.null(x[["output.locations"]]) && ! any(is.na(x[["output.locations"]])) && inherits( x[["output.locations"]], "character" ) )
     jresults["output.locations"] <- x["output.locations"]
   
 
