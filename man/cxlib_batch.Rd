@@ -16,9 +16,9 @@ cxlib_batch(
 
 \item{options}{List of options for executing R programs}
 
-\item{trace}{Enable trace messages}
+\item{silent}{(Not implemented) Disable messaging}
 
-\item{slient}{(Not implemented) Disable messaging}
+\item{trace}{Enable trace messages}
 }
 \value{
 Named list of execution results
@@ -54,6 +54,4 @@ The \code{logs} option is the directory where logs are stored. If the option is
 
 The \code{log.fileext} specifies te log file extension or suffix. Default is the
 standard \code{Rout}.
-
-If \code{silent=FALSE} the program execution log is printed to the console.
 }

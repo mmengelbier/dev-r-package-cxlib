@@ -2,7 +2,7 @@
 #' 
 #' @param x A job
 #' @param options List of options for executing R programs
-#' @param slient (Not implemented) Disable messaging
+#' @param silent (Not implemented) Disable messaging
 #' @param trace Enable trace messages
 #' 
 #' @return Named list of execution results
@@ -40,8 +40,6 @@
 #' The `log.fileext` specifies te log file extension or suffix. Default is the
 #' standard `Rout`. 
 #' 
-#' 
-#' If `silent=FALSE` the program execution log is printed to the console. 
 #' 
 #' @export
 
