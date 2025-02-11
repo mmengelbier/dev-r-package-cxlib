@@ -92,7 +92,7 @@
     if ( ! is.null(options) ) {
       
       # log directory
-      if ( "logs" %in% names(options) ) {
+      if ( "logs" %in% names(options) && ! is.null(options[["logs"]]) ) {
         
         if ( ! dir.exists( file.path( jdef[["working.directory"]], options[["logs"]], fsep = "/" ) ) )
           stop( "The specified directory for logs does not exist" )
@@ -272,12 +272,17 @@
     
   } # <-- end of for-loop for all actions
   
+
+  # -- update list of inputs
+  jdef[["inputs"]] <- lapply( sort(cxlib:::.cxlib_standardpath( list.files( jdef[["work.area"]], full.names = FALSE, recursive = TRUE, include.dirs = FALSE ) )), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( jdef[["work.area"]], x, fsep = "/" ), algo = "sha1", file = TRUE ) )
+  })
   
+    
   
   # -- return job definition
-  input_names <- names( jdef[["inputs"]] )
-  jdef[["inputs"]] <- unname( jdef[["inputs"]][ sort(input_names) ] )
-  
+
   jdef[["output.locations"]] <- base::unique( base::sort( jdef[["output.locations"]] ) )
   
   

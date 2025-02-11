@@ -73,6 +73,7 @@
 
   # -- initiate list of files to publish and delete
   #    note: publish after delete means publish
+  lst_files_logs <- character(0)
   lst_files_publish <- character(0)
   lst_files_delete <- character(0)
   
@@ -122,12 +123,15 @@
         ) 
           stop( "Inegrity check fail for program ", xact[["path"]], ". The program log has changed during job execution." )
         
+        # register log 
+        lst_files_logs <- unique( append( lst_files_logs, unname(xact[["log"]]["path"]) ) )
 
         # include log even if not within outputs
         lst_files_publish[ unname(xact[["log"]]["path"]) ] <- NA
         
-        if ( "sha1" %in% names(xact[["log"]]) )
+        if ( "sha1" %in% names(xact[["log"]]) ) 
           lst_files_publish[ unname(xact[["log"]]["path"]) ] <- unname(xact[["log"]]["sha1"])
+        
                 
       }  # end of if-statement on log in action
       
@@ -158,7 +162,7 @@
             
             # remove file from delete list if it is there
             # note: rather use full filter
-            lst_files_delete <-lst_files_delete[ ! names(lst_files_delete) %in% names(lst_files_publish) ]
+            lst_files_delete <- lst_files_delete[ ! names(lst_files_delete) %in% names(lst_files_publish) ]
   
           } # end of for-statement for files created and updated 
       
@@ -212,7 +216,8 @@
   for ( xfile in sort(names(lst_files_publish)) ) {
 
     # disregard file if not in a known output location
-    if ( ! base::dirname( xfile ) %in% jresults[["output.locations"]] )
+    if ( ! base::dirname( xfile ) %in% jresults[["output.locations"]] && 
+         ! xfile %in% lst_files_logs  )
       next()
     
     

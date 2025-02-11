@@ -4,7 +4,7 @@
 \alias{.cxlib_programexec}
 \title{Internal utility function to execute a R program in batch}
 \usage{
-.cxlib_programexec(x, options = NULL)
+.cxlib_programexec(x, job.id = NULL, options = NULL)
 }
 \arguments{
 \item{x}{Program file}
@@ -15,6 +15,13 @@
 A list of the execution results
 }
 \description{
-Internal utility function to execute a R program in batch
+\code{options} is a named list of options when executing the program.
+
+Option \code{work.area} specifies the work area to use when executing the program.
+If not specified, the current working directory is used.
+
+Option \code{log} specifies an alternative log file. If the \code{log} option is not
+specified, the log file name is derived from the program file name with
+suffix \code{.Rout}and is saved to the program parent directory.
 }
 \keyword{internal}

@@ -55,6 +55,13 @@ testthat::test_that( "batchlocalfs-input.programNoInput", {
                                       "reference.sha1" = NA ) 
   )
   
+  
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
+  })
+  
   # -- assertions
   
   # work area
@@ -75,7 +82,7 @@ testthat::test_that( "batchlocalfs-input.programNoInput", {
   
   # no input annotation
   testthat::expect_true( "inputs" %in% names(result) )
-  testthat::expect_length( result[["inputs"]], 0 )  
+  testthat::expect_equal( result[["inputs"]], expected_inputs )  
 
 })
 
@@ -142,6 +149,14 @@ testthat::test_that( "batchlocalfs-input.programInputNotExist", {
                                       "reference.sha1" = NA ) 
   )
   
+  
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
+  })
+  
+  
   # -- assertions
   
   # work area
@@ -162,7 +177,7 @@ testthat::test_that( "batchlocalfs-input.programInputNotExist", {
   
   # no input annotation
   testthat::expect_true( "inputs" %in% names(result) )
-  testthat::expect_length( result[["inputs"]], 0 )  
+  testthat::expect_equal( result[["inputs"]], expected_inputs )  
   
   
 })
@@ -238,8 +253,12 @@ testthat::test_that( "batchlocalfs-input.programInputFile", {
                                       "reference.sha1" = NA )  
   )
   
-  expected_inputs <- c( "path" = test_input_ref,
-                        "sha1" = digest::digest( test_input, algo = "sha1", file = TRUE ) )
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
+  })
+  
   
   
   # -- assertions
@@ -262,8 +281,7 @@ testthat::test_that( "batchlocalfs-input.programInputFile", {
   
   # input annotations
   testthat::expect_true( "inputs" %in% names(result) )
-  testthat::expect_length( result[["inputs"]], 1 )
-  testthat::expect_equal( result[["inputs"]][[1]], expected_inputs )
+  testthat::expect_equal( result[["inputs"]], expected_inputs )
   
 })
 
@@ -344,11 +362,12 @@ testthat::test_that( "batchlocalfs-input.programInputDirectory", {
                                       "reference.sha1" = NA )   
   )
   
-  expected_inputs <- lapply( sort(test_inputs_ref), function(x) {
-    c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
   })
-  
+
 
   
   # -- assertions
@@ -473,10 +492,12 @@ testthat::test_that( "batchlocalfs-input.programMultiInput", {
   )
   
 
-  expected_inputs <- lapply( sort( c( base::substring( test_inputdir_files, base::nchar( test_root ) + 2 ), test_input_file_ref) ), function(x) {
-    c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
-  })  
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
+  })
+  
   
   
   # -- assertions
@@ -624,10 +645,12 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   })
   
 
-  expected_inputs <- lapply( sort( c( base::substring( test_inputdir_files, base::nchar( test_root ) + 2 ), test_input_file_ref) ), function(x) {
-    c( "path" = x,
-       "sha1" = digest::digest( file.path( test_root, x, fsep = "/" ), algo = "sha1", file = TRUE ) )
-  })  
+  expected_inputs <- lapply( sort(list.files( test_root, recursive = TRUE, include.dirs = FALSE, full.names = FALSE)), function(x) {
+    c( "path" = x, 
+       "sha1" = digest::digest( file.path( test_root, x, fsep = "/"), algo = "sha1", file = TRUE ) )
+    
+  })
+  
   
   
   expected_program_files <- file.path( result[["work.area"]], test_programs_relpath, fsep = "/" )
@@ -658,3 +681,4 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   testthat::expect_equal( result[["inputs"]], expected_inputs )
   
 })
+

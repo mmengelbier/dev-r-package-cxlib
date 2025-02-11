@@ -13,7 +13,7 @@
 #' Option `work.area` specifies the work area to use when executing the program.
 #' If not specified, the current working directory is used.
 #' 
-#' Option `log` specifies an alteranive log file. If the `log` option is not 
+#' Option `log` specifies an alternative log file. If the `log` option is not 
 #' specified, the log file name is derived from the program file name with 
 #' suffix `.Rout`and is saved to the program parent directory. 
 #' 
