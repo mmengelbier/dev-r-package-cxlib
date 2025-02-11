@@ -7,26 +7,21 @@
 cxlib_batch(
   x,
   options = list(logs = NULL, log.fileext = "Rout"),
-  silent = FALSE
+  silent = FALSE,
+  trace = FALSE
 )
 }
 \arguments{
 \item{x}{A job}
 
-\item{Rout}{Execution log file}
+\item{options}{List of options for executing R programs}
 
-\item{user.libary}{Enable user library}
-
-\item{overwrite}{Enable overwriting existing output}
-
-\item{overwrite.input}{Enable overwriting inputs}
-
-\item{libs}{(Experimental) A vector of library paths}
+\item{trace}{Enable trace messages}
 
 \item{slient}{(Not implemented) Disable messaging}
 }
 \value{
-Named list of execution references
+Named list of execution results
 }
 \description{
 A job is a list of tasks to be executed. In its simplest form, it one or more
@@ -36,33 +31,29 @@ A job is executed in an isolated, temporary and transient working area.
 
 Note: All paths are relative to the current R session working directory, i.e.
 \code{getwd()}.
-#'
+
 Program required inputs and output locations are annotated in the program file
 using standard annotation syntax anywhere in the program file. Each annotation
 is defined on a separate line starting with the comment character \verb{#}. One or
 more spaces separate the annotation keyword and its value.
 
-Program input is specified using \verb{@input} followed by the input directory or
+Program input is specified using \verb{@cx.input} followed by the input directory or
 file path. If the input is a directory, all files in that directory is
 included.
 
-Program output locations is specified using the \verb{@output} directive. It is
+Program output locations is specified using the \verb{@cx.output} annotation. It is
 assumed that the output location is a directory.
 
-If the \code{log.file} is specified as a directory, a log file created will use
-the convention \if{html}{\out{<program name>}}.Rout. To use a different file name convention,
-specify the \code{log.file} as a full file name. The parent directory to the log
-file must exist.
+Only files created, updated or deleted in the output directory are returned
+in addition to the program log.
 
-The working directory is either set to the parent directory of the program
-\code{use.wd = "program"} or the root of the batch execution area \verb{use.wd = "root}.
-The default is the root of the batch execution area
+The function supports different execution options.
 
-The user R package library can be disabled with \code{user.library = FALSE}. If
-\code{internal = TRUE}, user library is disabled by default.
+The \code{logs} option is the directory where logs are stored. If the option is
+\code{NULL}, the program directory is used.
 
-The \code{internal} mode is used when \code{cxlib_batch()} is used as an internal
-utility.
+The \code{log.fileext} specifies te log file extension or suffix. Default is the
+standard \code{Rout}.
 
 If \code{silent=FALSE} the program execution log is printed to the console.
 }

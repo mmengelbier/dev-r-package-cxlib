@@ -1,14 +1,11 @@
 #' Simple utility to execute an R program script
 #' 
 #' @param x A job
-#' @param Rout Execution log file
-#' @param user.libary Enable user library
-#' @param overwrite Enable overwriting existing output
-#' @param overwrite.input Enable overwriting inputs
-#' @param libs (Experimental) A vector of library paths
+#' @param options List of options for executing R programs
 #' @param slient (Not implemented) Disable messaging
+#' @param trace Enable trace messages
 #' 
-#' @return Named list of execution references
+#' @return Named list of execution results
 #' 
 #' @description
 #' 
@@ -19,182 +16,267 @@
 #' 
 #' Note: All paths are relative to the current R session working directory, i.e.
 #' `getwd()`.
-#' #' 
+#'  
 #' Program required inputs and output locations are annotated in the program file
 #' using standard annotation syntax anywhere in the program file. Each annotation 
 #' is defined on a separate line starting with the comment character `#`. One or 
 #' more spaces separate the annotation keyword and its value.
 #' 
-#' Program input is specified using `@input` followed by the input directory or
+#' Program input is specified using `@cx.input` followed by the input directory or
 #' file path. If the input is a directory, all files in that directory is 
 #' included. 
 #' 
-#' Program output locations is specified using the `@output` directive. It is 
+#' Program output locations is specified using the `@cx.output` annotation. It is 
 #' assumed that the output location is a directory.
 #' 
-#' If the `log.file` is specified as a directory, a log file created will use 
-#' the convention <program name>.Rout. To use a different file name convention, 
-#' specify the `log.file` as a full file name. The parent directory to the log
-#' file must exist. 
+#' Only files created, updated or deleted in the output directory are returned 
+#' in addition to the program log.
 #' 
-#' The working directory is either set to the parent directory of the program 
-#' `use.wd = "program"` or the root of the batch execution area `use.wd = "root`.
-#' The default is the root of the batch execution area
+#' The function supports different execution options.
 #' 
-#' The user R package library can be disabled with `user.library = FALSE`. If 
-#' `internal = TRUE`, user library is disabled by default.
+#' The `logs` option is the directory where logs are stored. If the option is 
+#' `NULL`, the program directory is used. 
 #' 
-#' The `internal` mode is used when `cxlib_batch()` is used as an internal 
-#' utility. 
+#' The `log.fileext` specifies te log file extension or suffix. Default is the
+#' standard `Rout`. 
+#' 
 #' 
 #' If `silent=FALSE` the program execution log is printed to the console. 
 #' 
 #' @export
 
 
-cxlib_batch <- function( x, options = list( "logs" = NULL, "log.fileext" = "Rout" ), silent = FALSE ) {
+cxlib_batch <- function( x, options = list( "logs" = NULL, "log.fileext" = "Rout" ), silent = FALSE, trace = FALSE ) {
 
+  # -- generate job ID
+  #    note: job ID is in the UUID format
+  exec_id <- cxlib:::.cxlib_referenceid( type = "uuid" )
 
-  # -- experimental extensions
-  use.wd <- "root"
-  internal <- FALSE
-  libs <- .libPaths()
-  user.library <- TRUE
-  overwrite <- TRUE
-  overwrite.input <- FALSE
-
-
-  # -- initialize baseline default configuration 
+  # -- identify execution mode
   
-  #    baseline configuration elements
-  batch_cfg <- list( ".internal" = list(),
-                     "program" = character(0),
-                     "log" = character(0),
-                     "inputs" = list(),
-                     "outputs" = list() 
-                    )
-  
-
-  
-  
-  # -- current working directory
-  #    note: all paths are relative to the current R session working directory
-  batch_cfg[[".internal"]][["session.wd"]] <- getwd()
-
-
-  # -- default library paths
-  def_libpaths <- c( .Library.site, .Library )
-  
-  if ( ! internal && user.library && ! is.na(Sys.getenv("R_LIBS_USER", unset = NA)) )
-    def_libpaths <- append( unlist(strsplit( Sys.getenv("R_LIBS_USER"), .Platform$path.sep, fixed = TRUE), use.names = FALSE) , def_libpaths )
-  
-  batch_cfg[[".internal"]][["library.paths"]] <- def_libpaths
-  
-  
-    
-  # -- set up temporary execution area
-  batch_tmp <- base::tempfile( pattern = "cxbatch-", tmpdir = base::tempdir(), fileext = "" )
-  
-  on.exit({
-    base::unlink( batch_tmp, recursive = TRUE, force = TRUE )
-  }, add = TRUE)
-  
-  
-  if ( dir.exists( batch_tmp ) )
-    stop( "Unexpected isolated execution area already exists" )
-  
-  if ( ! dir.create( batch_tmp, recursive = TRUE ) )
-    stop( "Could not create an isolated execution area" )
-  
-  
-  #    add wrk to internal references
-  batch_cfg[[".internal"]][["temp.area"]] <- batch_tmp
-  
-
-  
-  # -- check on program 
-  
-  if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || (class(x) != "character") || (base::nchar(gsub("\\s", "", x)) == 0)  )
-    stop( "Program x invalid" )
-  
-  if ( ! file.exists( gsub( "//", "/", file.path(getwd(), x) ) ) || dir.exists( gsub( "//", "/", file.path(getwd(), x) ) ) )
-    stop( "Program file ", gsub( "//", "/", file.path(getwd(), x) ), " does not exist or is a directory" )  
+  # currently only supported
+  exec_mode <- "locafs"
   
   
   
   
   # -- stage 
+  #    note: initializes execution results with execution definition
   
-  batch_cfg[[".internal"]] <- append( batch_cfg[[".internal"]], 
-                                      cxlib:::.cxlib_batch_localfs( x, tmpdir = batch_tmp ) )
+  exec_job <- cxlib:::.cxlib_batch_localfs_stage( x, options = options )
 
+
+  if ( ! "work.area" %in% names(exec_job) )
+    stop( "Work area is not defined in job execution definition" )
+    
   
-  # -- program log
-  #    note: there is an internal log and an external one ... this is for the external one
+  # -- execute
   
-  if ( is.null(log.file) ) {
+  for ( xi in 1:length(exec_job[["actions"]]) ) {
     
-    batch_cfg[[".internal"]][["log"]]["ref.path"] <- file.path( dirname(batch_cfg[[".internal"]][["program"]]["ref.path"]), 
-                                                                paste0( tools::file_path_sans_ext( base::basename(batch_cfg[[".internal"]][["program"]]["ref.path"])) , ".Rout" ) )
-    
-  } else {
-
-    if ( any(is.na(log.file)) || (length(log.file) != 1) || (class(log.file) != "character") || ( base::nchar( base::trimws(log.file)) < 1 ) )
-      stop( "Log file is invalid" )
-   
-    
-    if ( dir.exists( cxlib:::.cxlib_standardpath( file.path( base::getwd(), log.file ) ) ) ) {
-      #    log.file is a directory
-      #    note: log file name is based on program name
-    
-      xlog <- cxlib:::.cxlib_standardpath( file.path( base::getwd(),
-                                                      log.file,
-                                                      paste0( tools::file_path_sans_ext( base::basename(batch_cfg[[".internal"]][["program"]]["ref.path"])) , ".Rout" ) ) )
-
-      batch_cfg[[".internal"]][["log"]]["ref.path"] <- xlog
-
-    } else {
-      #    log.file is assumed a file
+    if ( trace ) 
+      cat ( c( " ", 
+               paste( rep_len("-", 60), collapse = "" ),
+               paste0( "Action #", as.character(xi)),
+               " "),
+            sep = "\n" )
       
-      batch_cfg[[".internal"]][["log"]]["ref.path"] <- cxlib:::.cxlib_standardpath( file.path( base::getwd(), log.file ) )  
+
+
+    if ( ! "type" %in% names(exec_job[["actions"]][[xi]]) )
+      next()
+    
+    if ( exec_job[["actions"]][[xi]][["type"]] == "program" ) {
+    
+      # ensure program file exists
+      if ( ! "path" %in% names(exec_job[["actions"]][[xi]]) || ! file.exists( file.path( exec_job[["work.area"]], exec_job[["actions"]][[xi]][["path"]], fsep = "/" ) ) )
+        next()
       
-    }    
-    
-    
-    if ( ! dir.exists(dirname( batch_cfg[[".internal"]][["log"]]["ref.path"] )) )
-      stop("Parent directory ", dirname( batch_cfg[[".internal"]][["log"]]["ref.path"] ), " for the log does not exists" )
+      if ( trace ) 
+        cat( paste( "Program", exec_job[["actions"]][[xi]][["path"]] ), sep = "\n" )
+      
+      
+      # program integrity check
+      if ( "sha1" %in% names(exec_job[["actions"]][[xi]]) && 
+           ( digest::digest( file.path( exec_job[["work.area"]], exec_job[["actions"]][[xi]][["path"]], fsep = "/" ), algo = "sha1", file = TRUE ) != exec_job[["actions"]][[xi]][["sha1"]] ) )
+        stop( "Program integrity check failed" )
+      
 
-  }  # end of if-else-statement log.file is null
+      # - program options
+
+      # init with work area      
+      pgm_opt <- list( "work.area" = exec_job[["work.area"]] )
+      
+      # add log
+      if ( "log" %in% names(exec_job[["actions"]][[xi]]) && "path" %in% names(exec_job[["actions"]][[xi]][["log"]]) )
+        pgm_opt[["log"]] <- exec_job[["actions"]][[xi]][["log"]]["path"]
+      
+      
+      # - execute the program 
+      exec_jresult <- cxlib:::.cxlib_programexec( exec_job[["actions"]][[xi]][["path"]], job.id = exec_id, options = pgm_opt )
+      
+      
+      # - process results
+      
+      # log
+      if ( file.exists( file.path( exec_job[["work.area"]], exec_job[["actions"]][[xi]][["log"]]["path"], fsep = "/" ) ) )
+        exec_job[["actions"]][[xi]][["log"]]["sha1"] <- exec_jresult[["log"]]["sha1"]
+      
+      # copy results to the action 
+      
+      for ( xentry in c( "id", "files.input", "files.created", "files.updated", "files.deleted", "start.time",  "end.time" ) )
+        exec_job[["actions"]][[xi]][ xentry ] <- exec_jresult[ xentry ]
+      
+
+    } # end of if-statement for type program
     
+
+  } # end of for-statement across actions
+  
+  
+  
+  
+  # -- publish
+  exec_publish <- cxlib:::.cxlib_batch_localfs_publish( exec_job )
 
   
-  # -- define library environment
-
-  #    environment 
-  batch_cfg[[".internal"]][[".environ.file"]] <- file.path( batch_cfg[[".internal"]][["work.area"]], ".Renviron" )
+  # -- return results
+  return(invisible(exec_publish))
   
-    
-  #    init with default environment libraries 
-  env_libs <- batch_cfg[[".internal"]][["library.paths"]]
+}
   
-  #    add specified libs that exist
-  if ( ! is.null(libs) )
-    env_libs <- libs[ dir.exists( libs ) ]
-
-  
-  #    if user library should be disabled  
-  if ( ( internal || ! user.library ) && ! is.na(Sys.getenv("R_LIBS_USER", unset = NA ) ) ) {
-
-    #    get user libraries    
-    env_usrlibs <- unlist( strsplit( Sys.getenv("R_LIBS_USER", unset = NA ), .Platform$path.sep, fixed = TRUE ), use.names = FALSE )
-    
-    #    remove user libraries
-    env_libs <- env_libs[ ! env_libs %in% env_usrlibs ]
-  } 
-  
-  batch_cfg[[".internal"]][["library.paths"]] <- env_libs
-
-
+# 
+#   # -- initialize baseline default configuration 
+#   
+#   #    baseline configuration elements
+#   batch_cfg <- list( ".internal" = list(),
+#                      "program" = character(0),
+#                      "log" = character(0),
+#                      "inputs" = list(),
+#                      "outputs" = list() 
+#                     )
+#   
+# 
+#   
+#   
+#   # -- current working directory
+#   #    note: all paths are relative to the current R session working directory
+#   batch_cfg[[".internal"]][["session.wd"]] <- getwd()
+# 
+# 
+#   # -- default library paths
+#   def_libpaths <- c( .Library.site, .Library )
+#   
+#   if ( ! internal && user.library && ! is.na(Sys.getenv("R_LIBS_USER", unset = NA)) )
+#     def_libpaths <- append( unlist(strsplit( Sys.getenv("R_LIBS_USER"), .Platform$path.sep, fixed = TRUE), use.names = FALSE) , def_libpaths )
+#   
+#   batch_cfg[[".internal"]][["library.paths"]] <- def_libpaths
+#   
+#   
+#     
+#   # -- set up temporary execution area
+#   batch_tmp <- base::tempfile( pattern = "cxbatch-", tmpdir = base::tempdir(), fileext = "" )
+#   
+#   on.exit({
+#     base::unlink( batch_tmp, recursive = TRUE, force = TRUE )
+#   }, add = TRUE)
+#   
+#   
+#   if ( dir.exists( batch_tmp ) )
+#     stop( "Unexpected isolated execution area already exists" )
+#   
+#   if ( ! dir.create( batch_tmp, recursive = TRUE ) )
+#     stop( "Could not create an isolated execution area" )
+#   
+#   
+#   #    add wrk to internal references
+#   batch_cfg[[".internal"]][["temp.area"]] <- batch_tmp
+#   
+# 
+#   
+#   # -- check on program 
+#   
+#   if ( missing(x) || is.null(x) || any(is.na(x)) || (length(x) != 1) || (class(x) != "character") || (base::nchar(gsub("\\s", "", x)) == 0)  )
+#     stop( "Program x invalid" )
+#   
+#   if ( ! file.exists( gsub( "//", "/", file.path(getwd(), x) ) ) || dir.exists( gsub( "//", "/", file.path(getwd(), x) ) ) )
+#     stop( "Program file ", gsub( "//", "/", file.path(getwd(), x) ), " does not exist or is a directory" )  
+#   
+#   
+#   
+#   
+#   # -- stage 
+#   
+#   batch_cfg[[".internal"]] <- append( batch_cfg[[".internal"]], 
+#                                       cxlib:::.cxlib_batch_localfs( x, tmpdir = batch_tmp ) )
+# 
+#   
+#   # -- program log
+#   #    note: there is an internal log and an external one ... this is for the external one
+#   
+#   if ( is.null(log.file) ) {
+#     
+#     batch_cfg[[".internal"]][["log"]]["ref.path"] <- file.path( dirname(batch_cfg[[".internal"]][["program"]]["ref.path"]), 
+#                                                                 paste0( tools::file_path_sans_ext( base::basename(batch_cfg[[".internal"]][["program"]]["ref.path"])) , ".Rout" ) )
+#     
+#   } else {
+# 
+#     if ( any(is.na(log.file)) || (length(log.file) != 1) || (class(log.file) != "character") || ( base::nchar( base::trimws(log.file)) < 1 ) )
+#       stop( "Log file is invalid" )
+#    
+#     
+#     if ( dir.exists( cxlib:::.cxlib_standardpath( file.path( base::getwd(), log.file ) ) ) ) {
+#       #    log.file is a directory
+#       #    note: log file name is based on program name
+#     
+#       xlog <- cxlib:::.cxlib_standardpath( file.path( base::getwd(),
+#                                                       log.file,
+#                                                       paste0( tools::file_path_sans_ext( base::basename(batch_cfg[[".internal"]][["program"]]["ref.path"])) , ".Rout" ) ) )
+# 
+#       batch_cfg[[".internal"]][["log"]]["ref.path"] <- xlog
+# 
+#     } else {
+#       #    log.file is assumed a file
+#       
+#       batch_cfg[[".internal"]][["log"]]["ref.path"] <- cxlib:::.cxlib_standardpath( file.path( base::getwd(), log.file ) )  
+#       
+#     }    
+#     
+#     
+#     if ( ! dir.exists(dirname( batch_cfg[[".internal"]][["log"]]["ref.path"] )) )
+#       stop("Parent directory ", dirname( batch_cfg[[".internal"]][["log"]]["ref.path"] ), " for the log does not exists" )
+# 
+#   }  # end of if-else-statement log.file is null
+#     
+# 
+#   
+#   # -- define library environment
+# 
+#   #    environment 
+#   batch_cfg[[".internal"]][[".environ.file"]] <- file.path( batch_cfg[[".internal"]][["work.area"]], ".Renviron" )
+#   
+#     
+#   #    init with default environment libraries 
+#   env_libs <- batch_cfg[[".internal"]][["library.paths"]]
+#   
+#   #    add specified libs that exist
+#   if ( ! is.null(libs) )
+#     env_libs <- libs[ dir.exists( libs ) ]
+# 
+#   
+#   #    if user library should be disabled  
+#   if ( ( internal || ! user.library ) && ! is.na(Sys.getenv("R_LIBS_USER", unset = NA ) ) ) {
+# 
+#     #    get user libraries    
+#     env_usrlibs <- unlist( strsplit( Sys.getenv("R_LIBS_USER", unset = NA ), .Platform$path.sep, fixed = TRUE ), use.names = FALSE )
+#     
+#     #    remove user libraries
+#     env_libs <- env_libs[ ! env_libs %in% env_usrlibs ]
+#   } 
+#   
+#   batch_cfg[[".internal"]][["library.paths"]] <- env_libs
+# 
+# 
   # 
   # # -- process annotations
   # 
@@ -326,187 +408,187 @@ cxlib_batch <- function( x, options = list( "logs" = NULL, "log.fileext" = "Rout
   # }
   # 
   # 
-  
-  
-  # -- perform pre-execution inventory    
-  pre_inv <- sapply( list.files( batch_cfg[[".internal"]][["work.area"]], full.names = TRUE, recursive = TRUE ), function(x) {
-    digest::digest( x, algo = "sha1", file = TRUE )  
-  }, USE.NAMES = TRUE)
-  
-
-
-  # -- batch execute program
-  
-  #    initiate batch cmd sequence
-  batch_cmd <- character(0)
-  
-  
-  #    add redirect to internal working directory
-  batch_cmd <- paste( "cd", batch_cfg[[".internal"]][["work.area"]] )
-  
-  
-  #    build R command  
-  batch_cmd_r <- character(0)
-  
-  if ( ( .Platform$OS.type == "unix" ) && file.exists( file.path( R.home("bin"), "R") ) )
-    batch_cmd_r <- file.path( R.home("bin"), "R")
-  
-  if ( ( .Platform$OS.type == "windows" ) && file.exists( file.path( R.home("bin"), "R.exe") ) )
-    batch_cmd_r <- file.path( R.home("bin"), "R.exe")
-  
-  if ( length(batch_cmd_r) != 1 )
-    stop( "Cannot identify R executable" )
-    
-  #    - add batch instruction
-  batch_cmd_r <- append( batch_cmd_r, "CMD BATCH")
-  
-  #    - add program 
-  batch_cmd_r <- append( batch_cmd_r, batch_cfg[[".internal"]][["program"]]["path"] )
-
-  #    - add log 
-  batch_cmd_r <- append( batch_cmd_r, batch_cfg[[".internal"]][["log"]]["path"] )
-  
-  #    - add std error redirect
-  if ( .Platform$OS.type == "unix" ) 
-    batch_cmd_r <- append( batch_cmd_r, "2>&1" )
-  
-  #    append R cmd to command sequence
-  batch_cmd <- append( batch_cmd, paste( batch_cmd_r, collapse = " ") )
-  
-  
-  #    run program 
-  cmd <- paste( batch_cmd, collapse = " ; ")
-
-  rc <- base::suppressWarnings( try( system( cmd, intern = TRUE, wait = TRUE ), silent = TRUE ) )
-  
-  
-  #    initial assessment
-  exec_reports_fail <- FALSE
-  
-  if ( inherits( rc, "try-error") || ( "status" %in% names(attributes(rc)) && attributes(rc)$status != 0 ) )
-    exec_reports_fail <- TRUE
-
-
-  #    verify we have a log
-  if ( ! file.exists( batch_cfg[[".internal"]][["log"]]["path"] ) )
-    stop( "Execution log not generated" )
-
-  batch_cfg[[".internal"]][["log"]]["sha1"] <- digest::digest( batch_cfg[[".internal"]][["log"]]["path"], algo = "sha1", file = TRUE )
-  
-
-  # -- perform post-execution inventory    
-  
-  #    inventor file system   
-  post_inv <- sapply( list.files( batch_cfg[[".internal"]][["work.area"]], full.names = TRUE, recursive = TRUE ), function(x) {
-    digest::digest( x, algo = "sha1", file = TRUE )  
-  }, USE.NAMES = TRUE)
-  
-  
-  #    program integrity check 
-  if ( post_inv[[ batch_cfg[[".internal"]][["program"]]["path"] ]] != batch_cfg[[".internal"]][["program"]]["sha1"] ) 
-    stop( "Integrity check failure. Program ", base::basename(batch_cfg[[".internal"]][["program"]]["path"]), " changed during processing." )
-  
-  
-  
-  # -- output log in console    
-  if ( ! silent )
-    cat( c( "-----------------------------------------------------------------------",
-            "-- Begin program log  -------------------------------------------------",
-            " ",
-            readLines( batch_cfg[[".internal"]][["log"]]["path"] ),            
-            
-            " ",
-            "-- End program log  ---------------------------------------------------",
-            "-----------------------------------------------------------------------"
-    ),
-    sep = "\n")
-  
-  
-      
-
-  
-print(post_inv)  
-return()
-
-
-  #    identify files in output locations
-  post_inv_outputs <- character(0)
-  
-  for ( xitem in names(batch_cfg[[".internal"]][[ "outputs" ]]) ) {
-    
-    xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]] 
-    
-    if ( ! dir.exists(xpath) )
-      next()
-    
-    post_inv_outputs <- append( post_inv_outputs, list.files( xpath, full.names = TRUE, recursive = FALSE, include.dirs = FALSE ) )
-  }
-  
-  
-    
-  
-  
-
-
-  
-  # -- determine file system changes 
-  
-  #    note: list is in the form of named vectors of sha1's
-  fs_delta <- list( "new" = character(0), "updates" = character(0), "deleted" = character(0))
-  
-  
-  
-  
-  
-  # -- identify outputs
-  
-  for ( xitem in names(batch_cfg[[".internal"]][[ "outputs" ]]) ) {
-    
-    xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]] 
-    
-    if ( ! dir.exists(xpath) )
-      next()
-    
-    batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["files"]] <- list.files( xpath, full.names = FALSE, recursive = FALSE ) 
-  }
-  
-  
-    
-  
-  # -- write back 
-
-  #    log
-  if ( ! file.rename( batch_cfg[[".internal"]][["log"]], file.path( base::dirname(batch_cfg[[".internal"]][["log"]]), base::basename(batch_cfg[["log"]]["path"])) ) )
-    stop( "Could not set name for log" )
-
-    
-  if ( ! file.copy( file.path( base::dirname(batch_cfg[[".internal"]][["log"]]), base::basename(batch_cfg[["log"]]["path"])), 
-                    dirname(batch_cfg[["log"]]["path"]), overwrite = TRUE, copy.date = TRUE, copy.mode = FALSE ) )
-    stop( "Could not save log" )
-  
-  
-  #    outputs
-  for ( xitem in names( batch_cfg[[".internal"]][[ "outputs" ]] ) ) {
-    
-    xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]]
-    
-    for ( xfile in batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["files"]] ) {
-      
-      xtarget <- cxlib:::.cxlib_standardpath( file.path( getwd(), xitem, base::basename(xfile) )  )
-      
-      if ( ! file.copy( file.path(xpath, xfile), xtarget, copy.mode = FALSE, copy.date = TRUE, overwrite = TRUE ) )
-        stop( "Could not write file ", xtarget )
-      
-      batch_cfg[["outputs"]][[ file.path(xitem, xfile) ]] <- c( "path" = xtarget, "sha1" = digest::digest( xtarget, algo = "sha1", file = TRUE) )
-    }
-    
-  }
-  
-        
-  
-  # -- standard return details
-  return(invisible(batch_cfg))    
-  
-}
-
+#   
+#   
+#   # -- perform pre-execution inventory    
+#   pre_inv <- sapply( list.files( batch_cfg[[".internal"]][["work.area"]], full.names = TRUE, recursive = TRUE ), function(x) {
+#     digest::digest( x, algo = "sha1", file = TRUE )  
+#   }, USE.NAMES = TRUE)
+#   
+# 
+# 
+#   # -- batch execute program
+#   
+#   #    initiate batch cmd sequence
+#   batch_cmd <- character(0)
+#   
+#   
+#   #    add redirect to internal working directory
+#   batch_cmd <- paste( "cd", batch_cfg[[".internal"]][["work.area"]] )
+#   
+#   
+#   #    build R command  
+#   batch_cmd_r <- character(0)
+#   
+#   if ( ( .Platform$OS.type == "unix" ) && file.exists( file.path( R.home("bin"), "R") ) )
+#     batch_cmd_r <- file.path( R.home("bin"), "R")
+#   
+#   if ( ( .Platform$OS.type == "windows" ) && file.exists( file.path( R.home("bin"), "R.exe") ) )
+#     batch_cmd_r <- file.path( R.home("bin"), "R.exe")
+#   
+#   if ( length(batch_cmd_r) != 1 )
+#     stop( "Cannot identify R executable" )
+#     
+#   #    - add batch instruction
+#   batch_cmd_r <- append( batch_cmd_r, "CMD BATCH")
+#   
+#   #    - add program 
+#   batch_cmd_r <- append( batch_cmd_r, batch_cfg[[".internal"]][["program"]]["path"] )
+# 
+#   #    - add log 
+#   batch_cmd_r <- append( batch_cmd_r, batch_cfg[[".internal"]][["log"]]["path"] )
+#   
+#   #    - add std error redirect
+#   if ( .Platform$OS.type == "unix" ) 
+#     batch_cmd_r <- append( batch_cmd_r, "2>&1" )
+#   
+#   #    append R cmd to command sequence
+#   batch_cmd <- append( batch_cmd, paste( batch_cmd_r, collapse = " ") )
+#   
+#   
+#   #    run program 
+#   cmd <- paste( batch_cmd, collapse = " ; ")
+# 
+#   rc <- base::suppressWarnings( try( system( cmd, intern = TRUE, wait = TRUE ), silent = TRUE ) )
+#   
+#   
+#   #    initial assessment
+#   exec_reports_fail <- FALSE
+#   
+#   if ( inherits( rc, "try-error") || ( "status" %in% names(attributes(rc)) && attributes(rc)$status != 0 ) )
+#     exec_reports_fail <- TRUE
+# 
+# 
+#   #    verify we have a log
+#   if ( ! file.exists( batch_cfg[[".internal"]][["log"]]["path"] ) )
+#     stop( "Execution log not generated" )
+# 
+#   batch_cfg[[".internal"]][["log"]]["sha1"] <- digest::digest( batch_cfg[[".internal"]][["log"]]["path"], algo = "sha1", file = TRUE )
+#   
+# 
+#   # -- perform post-execution inventory    
+#   
+#   #    inventor file system   
+#   post_inv <- sapply( list.files( batch_cfg[[".internal"]][["work.area"]], full.names = TRUE, recursive = TRUE ), function(x) {
+#     digest::digest( x, algo = "sha1", file = TRUE )  
+#   }, USE.NAMES = TRUE)
+#   
+#   
+#   #    program integrity check 
+#   if ( post_inv[[ batch_cfg[[".internal"]][["program"]]["path"] ]] != batch_cfg[[".internal"]][["program"]]["sha1"] ) 
+#     stop( "Integrity check failure. Program ", base::basename(batch_cfg[[".internal"]][["program"]]["path"]), " changed during processing." )
+#   
+#   
+#   
+#   # -- output log in console    
+#   if ( ! silent )
+#     cat( c( "-----------------------------------------------------------------------",
+#             "-- Begin program log  -------------------------------------------------",
+#             " ",
+#             readLines( batch_cfg[[".internal"]][["log"]]["path"] ),            
+#             
+#             " ",
+#             "-- End program log  ---------------------------------------------------",
+#             "-----------------------------------------------------------------------"
+#     ),
+#     sep = "\n")
+#   
+#   
+#       
+# 
+#   
+# print(post_inv)  
+# return()
+# 
+# 
+#   #    identify files in output locations
+#   post_inv_outputs <- character(0)
+#   
+#   for ( xitem in names(batch_cfg[[".internal"]][[ "outputs" ]]) ) {
+#     
+#     xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]] 
+#     
+#     if ( ! dir.exists(xpath) )
+#       next()
+#     
+#     post_inv_outputs <- append( post_inv_outputs, list.files( xpath, full.names = TRUE, recursive = FALSE, include.dirs = FALSE ) )
+#   }
+#   
+#   
+#     
+#   
+#   
+# 
+# 
+#   
+#   # -- determine file system changes 
+#   
+#   #    note: list is in the form of named vectors of sha1's
+#   fs_delta <- list( "new" = character(0), "updates" = character(0), "deleted" = character(0))
+#   
+#   
+#   
+#   
+#   
+#   # -- identify outputs
+#   
+#   for ( xitem in names(batch_cfg[[".internal"]][[ "outputs" ]]) ) {
+#     
+#     xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]] 
+#     
+#     if ( ! dir.exists(xpath) )
+#       next()
+#     
+#     batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["files"]] <- list.files( xpath, full.names = FALSE, recursive = FALSE ) 
+#   }
+#   
+#   
+#     
+#   
+#   # -- write back 
+# 
+#   #    log
+#   if ( ! file.rename( batch_cfg[[".internal"]][["log"]], file.path( base::dirname(batch_cfg[[".internal"]][["log"]]), base::basename(batch_cfg[["log"]]["path"])) ) )
+#     stop( "Could not set name for log" )
+# 
+#     
+#   if ( ! file.copy( file.path( base::dirname(batch_cfg[[".internal"]][["log"]]), base::basename(batch_cfg[["log"]]["path"])), 
+#                     dirname(batch_cfg[["log"]]["path"]), overwrite = TRUE, copy.date = TRUE, copy.mode = FALSE ) )
+#     stop( "Could not save log" )
+#   
+#   
+#   #    outputs
+#   for ( xitem in names( batch_cfg[[".internal"]][[ "outputs" ]] ) ) {
+#     
+#     xpath <- batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["path"]]
+#     
+#     for ( xfile in batch_cfg[[".internal"]][[ "outputs" ]][[xitem]][["files"]] ) {
+#       
+#       xtarget <- cxlib:::.cxlib_standardpath( file.path( getwd(), xitem, base::basename(xfile) )  )
+#       
+#       if ( ! file.copy( file.path(xpath, xfile), xtarget, copy.mode = FALSE, copy.date = TRUE, overwrite = TRUE ) )
+#         stop( "Could not write file ", xtarget )
+#       
+#       batch_cfg[["outputs"]][[ file.path(xitem, xfile) ]] <- c( "path" = xtarget, "sha1" = digest::digest( xtarget, algo = "sha1", file = TRUE) )
+#     }
+#     
+#   }
+#   
+#         
+#   
+#   # -- standard return details
+#   return(invisible(batch_cfg))    
+#   
+# }
+# 
 
