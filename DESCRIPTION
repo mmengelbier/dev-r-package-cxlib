@@ -5,8 +5,9 @@ Authors@R:
     person("Magnus", "Mengelbier", , "magnus.mengelbier@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8673-7625"))
 Imports: base, tools, digest (>= 0.6.37), callr (>= 3.7.6), uuid (>= 1.2-0)
+Suggests: testthat (>= 3.0.0)
 Description: Collection of R utilities, functions and object for library management, setup, configuration and interacting with data and analysis in Life Science GxP and regulated environments.
-License: `use_apache()`
+License: Apache License (== 2.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
