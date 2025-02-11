@@ -63,7 +63,7 @@ testthat::test_that( "batch.localSingleProgram", {
   
   
   # -- test
-  result <- cxlib::cxlib_batch( test_program_ref )
+  result <- cxlib::cxlib_batch( test_program_ref, silent = TRUE )
   
 
 
@@ -160,7 +160,7 @@ testthat::test_that( "batch.localSingleProgramAltLog", {
   
   
   # -- test
-  result <- cxlib::cxlib_batch( test_program_ref, options = list( "log.fileext" = "log" ) )
+  result <- cxlib::cxlib_batch( test_program_ref, options = list( "log.fileext" = "log" ), silent = TRUE )
   
   
   
@@ -264,7 +264,7 @@ testthat::test_that( "batch.localSingleProgramAltLogDir", {
   
   
   # -- test
-  result <- cxlib::cxlib_batch( test_program_ref, options = list( "logs" = test_log_parent ) )
+  result <- cxlib::cxlib_batch( test_program_ref, options = list( "logs" = test_log_parent ), silent = TRUE )
   
   
   
@@ -369,7 +369,7 @@ testthat::test_that( "batch.localSingleProgramAltLogDirLogSuffix", {
   
   
   # -- test
-  result <- cxlib::cxlib_batch( test_program_ref, options = list( "logs" = test_log_parent, "log.fileext" = "log" ) )
+  result <- cxlib::cxlib_batch( test_program_ref, options = list( "logs" = test_log_parent, "log.fileext" = "log" ), silent = TRUE )
   
   
   
@@ -594,10 +594,9 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   
   
   # -- test
-  results <- cxlib::cxlib_batch( test_program_refs, options = list( "logs" = test_log_parent, "log.fileext" = "log" ), trace = FALSE )
+  results <- cxlib::cxlib_batch( test_program_refs, options = list( "logs" = test_log_parent, "log.fileext" = "log" ), silent = TRUE )
   
 
-  
   # -- expectations
 
   post_inv <- sapply( list.files( test_root, recursive = TRUE, full.names = FALSE, include.dirs = FALSE ), function(x) {
