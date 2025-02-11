@@ -10,7 +10,7 @@
 \item{x}{Job results}
 }
 \value{
-Invisible NULL
+Invisible Job results
 }
 \description{
 Internal utility to publish results of a job to local file system

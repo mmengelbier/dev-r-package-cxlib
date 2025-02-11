@@ -9,7 +9,9 @@
 \arguments{
 \item{x}{Program file}
 
-\item{work.area}{Working area for program execution}
+\item{job.id}{Jon ID reference}
+
+\item{options}{Execution options}
 }
 \value{
 A list of the execution results

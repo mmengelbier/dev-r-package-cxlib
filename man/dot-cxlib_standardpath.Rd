@@ -18,3 +18,4 @@ A vector of paths in standard reference format
 A standard reference uses single forward slashes as directory and file
 separator.
 }
+\keyword{internal}
