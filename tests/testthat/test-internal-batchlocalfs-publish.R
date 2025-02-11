@@ -71,11 +71,11 @@ testthat::test_that( "batchlocalfs.publishJobNoAction", {
   # set up job
   
   test_action <- list( "type" = "program",
-                       "files.created" = lapply( head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
+                       "files.created" = lapply( utils::head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }), 
-                       "files.updated" = lapply( tail( sort(test_file_refs), n = 1), function(x) {
+                       "files.updated" = lapply( utils::tail( sort(test_file_refs), n = 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }) )
@@ -196,11 +196,11 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateUpdate", {
   # set up job
   
   test_action <- list( "type" = "program",
-                       "files.created" = lapply( head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
+                       "files.created" = lapply( utils::head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                         }), 
-                       "files.updated" = lapply( tail( sort(test_file_refs), n = 1), function(x) {
+                       "files.updated" = lapply( utils::tail( sort(test_file_refs), n = 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }) )
@@ -338,11 +338,11 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateUpdateOverwrite"
   # set up job
   
   test_action <- list( "type" = "program",
-                       "files.created" = lapply( head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
+                       "files.created" = lapply( utils::head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }), 
-                       "files.updated" = lapply( tail( sort(test_file_refs), n = 1), function(x) {
+                       "files.updated" = lapply( utils::tail( sort(test_file_refs), n = 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }) )
@@ -484,11 +484,11 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDelete", {
   # set up job
   
   test_action <- list( "type" = "program",
-                       "files.created" = lapply( head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
+                       "files.created" = lapply( utils::head( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }), 
-                       "files.deleted" = lapply( tail( sort(test_file_refs), n = 1), function(x) {
+                       "files.deleted" = lapply( utils::tail( sort(test_file_refs), n = 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }) )
@@ -520,8 +520,8 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDelete", {
                            "output.locations" = test_output_parent,
                            "actions" = list(test_action),
                            "inputs" = list(), 
-                           "outputs" = head( expected_outputs, n = 2),
-                           "deleted" = tail( expected_outputs, n = 1) )
+                           "outputs" = utils::head( expected_outputs, n = 2),
+                           "deleted" = utils::tail( expected_outputs, n = 1) )
   
   # -- assertions 
   
@@ -535,10 +535,10 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDelete", {
 
 
   # files in work area are copied to working directory
-  testthat::expect_true( all( file.exists( file.path( wrkdir, base::substring( head( sort(test_files), n = 2), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
+  testthat::expect_true( all( file.exists( file.path( wrkdir, base::substring( utils::head( sort(test_files), n = 2), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
 
   # file to be deleted is
-  testthat::expect_false( all( file.exists(file.path( wrkdir, base::substring( tail( sort(test_files), n = 1), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
+  testthat::expect_false( all( file.exists(file.path( wrkdir, base::substring( utils::tail( sort(test_files), n = 1), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
 
 
   # verify SHA-1 from work area
@@ -633,11 +633,11 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDeleteOnlyExist"
   # set up job
   
   test_action <- list( "type" = "program",
-                       "files.created" = lapply( head( sort(test_file_refs), n = 1 ), function(x) {
+                       "files.created" = lapply( utils::head( sort(test_file_refs), n = 1 ), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }), 
-                       "files.deleted" = lapply( tail( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
+                       "files.deleted" = lapply( utils::tail( sort(test_file_refs), n = length(test_file_refs) - 1), function(x) {
                          c( "path" = x,
                             "sha1" = digest::digest( file.path( wrkarea, x, fsep = "/"), algo = "sha1", file = TRUE ) )
                        }) )
@@ -669,8 +669,8 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDeleteOnlyExist"
                            "output.locations" = test_output_parent,
                            "actions" = list(test_action),
                            "inputs" = list(), 
-                           "outputs" = head( expected_outputs, n = 1),
-                           "deleted" = tail( expected_outputs, n = 1) )
+                           "outputs" = utils::head( expected_outputs, n = 1),
+                           "deleted" = utils::tail( expected_outputs, n = 1) )
   
   # -- assertions 
   
@@ -684,10 +684,10 @@ testthat::test_that( "batchlocalfs.publishJobProgramActionCreateDeleteOnlyExist"
   
   
   # files in work area are copied to working directory
-  testthat::expect_true( all( file.exists( file.path( wrkdir, base::substring( head( sort(test_files), n = 1), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
+  testthat::expect_true( all( file.exists( file.path( wrkdir, base::substring( utils::head( sort(test_files), n = 1), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
   
   # file to be deleted is
-  testthat::expect_false( all( file.exists(file.path( wrkdir, base::substring( tail( sort(test_files), n = 2), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
+  testthat::expect_false( all( file.exists(file.path( wrkdir, base::substring( utils::tail( sort(test_files), n = 2), base::nchar(wrkarea) + 2 ), fsep = "/" )) ) )
   
   
   # verify SHA-1 from work area

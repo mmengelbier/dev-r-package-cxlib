@@ -9,7 +9,7 @@
 #' A standard reference uses single forward slashes as directory and file 
 #' separator.
 #' 
-#' 
+#' @keywords internal
 
 .cxlib_standardpath <- function(x, normalize = FALSE ) {
 

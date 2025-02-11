@@ -44,7 +44,7 @@ cxlib_propertiesread <- function( x ) {
   
   
   # - identify the properties file to process, i.e. the first one that exists
-  xpath <- head( x[ file.exists(x) ], n = 1 )
+  xpath <- utils::head( x[ file.exists(x) ], n = 1 )
   
   
   # - read property file
@@ -61,7 +61,7 @@ cxlib_propertiesread <- function( x ) {
   
   for ( xl in xlines ) {
     
-    idx <- head( unlist(gregexpr( "[=:]", xl, perl = TRUE)), n  = 1 )
+    idx <- utils::head( unlist(gregexpr( "[=:]", xl, perl = TRUE)), n  = 1 )
     
     # - futility ... need at least one character before the key/value delimiter
     if ( idx < 2 )

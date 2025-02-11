@@ -2,7 +2,8 @@
 #' 
 #' 
 #' @param x Program file
-#' @param work.area Working area for program execution
+#' @param job.id Jon ID reference
+#' @param options Execution options
 #' 
 #' @return A list of the execution results
 #' 

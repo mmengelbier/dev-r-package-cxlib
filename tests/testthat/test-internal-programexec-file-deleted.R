@@ -200,7 +200,7 @@ testthat::test_that( "programexec.auditMultiDeleted", {
   test_program <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = test_program_parent, fileext = ".R" ) )
   
   
-  test_files_to_be_deleted <- sapply( head(test_references, n = 4 ), function(x) {
+  test_files_to_be_deleted <- sapply( utils::head(test_references, n = 4 ), function(x) {
     file.path( test_output_parent_refs[ base::match( x, test_references ) ], 
                paste0( "output-", as.character(base::match( x, test_references )), ".txt"),
                fsep = "/" )  

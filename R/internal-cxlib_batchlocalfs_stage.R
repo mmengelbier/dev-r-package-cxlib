@@ -39,7 +39,7 @@
     stop( "Internal error generating obfuscated levels" )
   
   
-  jdef[["work.area"]] <- cxlib:::.cxlib_standardpath( file.path( base::tempdir(), paste( head( wrk, n = 3), collapse = "/" ), fsep = "/" ) )
+  jdef[["work.area"]] <- cxlib:::.cxlib_standardpath( file.path( base::tempdir(), paste( utils::head( wrk, n = 3), collapse = "/" ), fsep = "/" ) )
   
 
   if ( ! dir.exists( jdef[["work.area"]] ) && ! dir.create( jdef[["work.area"]], recursive = TRUE ) )
@@ -103,7 +103,7 @@
       
       # log file suffix
       if ( "log.fileext" %in% names(options) && ! is.null(options[["log.fileext"]]) && ! any(is.na(options[["log.fileext"]])) ) 
-        log_suffix <-as.character( head( options[["log.fileext"]], n = 1 ) )     
+        log_suffix <-as.character( utils::head( options[["log.fileext"]], n = 1 ) )     
 
     }
     

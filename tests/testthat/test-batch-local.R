@@ -531,8 +531,8 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   
   pgm <- c( "# test program 2",
             "# create new output from an input",
-            paste( "# @cx.input", head( test_input_refs, n = 1 ) ),
-            paste0( "txt_input <- base::readLines( con = \"", head( test_input_refs, n = 1 ), "\" )" ),
+            paste( "# @cx.input", utils::head( test_input_refs, n = 1 ) ),
+            paste0( "txt_input <- base::readLines( con = \"", utils::head( test_input_refs, n = 1 ), "\" )" ),
             paste( "# @cx.output", test_output_parent),
             paste0( "out <- base::gsub( \"\\\\\\\\\", \"/\", base::tempfile( pattern = \"output-\", tmpdir = \"", test_output_parent, "\", fileext = \".txt\") )"), 
             "cat( txt_input, sep = \"\\n\", file = out )" ) 
@@ -546,9 +546,9 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
 
   pgm <- c( "# test program 3",
             "# update an existing output",
-            paste( "# @cx.input", head( test_output_file_refs, n = 1 )),
+            paste( "# @cx.input", utils::head( test_output_file_refs, n = 1 )),
             paste( "# @cx.output", test_output_parent),
-            paste0( "out <- \"", head( test_output_file_refs, n = 1 ), "\"" ), 
+            paste0( "out <- \"", utils::head( test_output_file_refs, n = 1 ), "\"" ), 
             "cat( paste( base::sample( c( base::LETTERS, base::letters, as.character(0:9)), 25 ), collapse = \"\"), sep = \"\\n\", file = out )" ) 
   
   base::writeLines( pgm, con = test_programs[3] )
@@ -560,9 +560,9 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   
   pgm <- c( "# test program 4",
             "# delete an existing input",
-            paste( "# @cx.input", tail( test_input_refs, n = 1 ) ),
+            paste( "# @cx.input", utils::tail( test_input_refs, n = 1 ) ),
             paste( "# @cx.output", test_input_parent),
-            paste0( "to_delete <- \"", tail( test_input_refs, n = 1 ), "\"" ), 
+            paste0( "to_delete <- \"", utils::tail( test_input_refs, n = 1 ), "\"" ), 
             "base::unlink( to_delete, force = TRUE )" ) 
   
   base::writeLines( pgm, con = test_programs[4] )
@@ -625,9 +625,9 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   # inputs
 
   expected_input_files <- c( test_program_refs, 
-                             head( test_input_refs, n = 1 ),
-                             head( test_output_file_refs, n = 1 ),
-                             tail( test_input_refs, n = 1 )
+                             utils::head( test_input_refs, n = 1 ),
+                             utils::head( test_output_file_refs, n = 1 ),
+                             utils::tail( test_input_refs, n = 1 )
                             )
 
   expected_inputs <- lapply( sort(expected_input_files), function(x) {
@@ -639,7 +639,7 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   # outputs
   
   expected_output_files <- c( post_inv_files[ grepl( paste0( "^", test_output_parent, "/output-[a-z0-9]*\\.txt$"), post_inv_files, perl = TRUE, ignore.case = TRUE ) ],
-                              head( test_output_file_refs, n = 1 ),
+                              utils::head( test_output_file_refs, n = 1 ),
                               post_inv_files[ grepl( paste0( "^some/path/to/logs/test-program-[a-z]*-[a-z0-9]*\\.log$"), post_inv_files, perl = TRUE, ignore.case = TRUE ) ]
                             )
   
@@ -652,7 +652,7 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
 
   # deleted
   
-  expected_deleted_files <- tail( test_input_refs, n = 1 )
+  expected_deleted_files <- utils::tail( test_input_refs, n = 1 )
   
   expected_deleted <- lapply( sort(expected_deleted_files), function(x) {
     c( "path" = x,
@@ -665,7 +665,7 @@ testthat::test_that( "batch.localComplexProgramsAltLogDirLogSuffix", {
   
   inv_common_files <- intersect( post_inv_files, names(test_input_inv) )
   
-  expected_unchanged_files <- inv_common_files[ ! inv_common_files %in% head( test_output_file_refs, n = 1 ) ]
+  expected_unchanged_files <- inv_common_files[ ! inv_common_files %in% utils::head( test_output_file_refs, n = 1 ) ]
   
   
 

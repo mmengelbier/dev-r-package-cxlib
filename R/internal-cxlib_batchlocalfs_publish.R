@@ -2,7 +2,7 @@
 #' 
 #' @param x Job results
 #' 
-#' @return Invisible NULL
+#' @return Invisible Job results
 #' 
 #' @keywords internal
 

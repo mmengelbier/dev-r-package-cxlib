@@ -598,7 +598,7 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
     testthat::fail( "Could not stage test program parent directory" )
   
   
-  for ( xpgm in head( test_programs, n = 3 ) ) {
+  for ( xpgm in utils::head( test_programs, n = 3 ) ) {
     
     pgm <- c( "# test program",
               "# input file",
@@ -612,7 +612,7 @@ testthat::test_that( "batchlocalfs-input.multiProgramInputWithDuplicates", {
   }
   
   
-  for ( xpgm in tail( test_programs, n = 2 ) ) {
+  for ( xpgm in utils::tail( test_programs, n = 2 ) ) {
     
     pgm <- c( "# test program",
               "# input directory",

@@ -140,7 +140,7 @@ testthat::test_that( "batchlocalfs.programSingleNotExist", {
     test_programs[x] <- base::gsub( "\\\\", "/", base::tempfile( pattern = "test-program-", tmpdir = test_root, fileext = ".R" ) )
   
   # create all but last program 
-  for ( xpath in head( test_programs, n = length(test_programs) -1  ) )  {
+  for ( xpath in utils::head( test_programs, n = length(test_programs) -1  ) )  {
     
     writeLines( "# test program", con = xpath)
     

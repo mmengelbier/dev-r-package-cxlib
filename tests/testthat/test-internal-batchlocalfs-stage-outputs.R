@@ -375,10 +375,10 @@ testthat::test_that( "batchlocalfs-output.multiProgramMultipleOutputs", {
     testthat::fail( "Could not stage test program parent directory" )
   
   
-  for ( xpgm in head( test_programs, n = 3) ) {
+  for ( xpgm in utils::head( test_programs, n = 3) ) {
       
     pgm <- c( "# test program",
-              paste( "# @cx.output", tail( test_output_ref, n = 3 ) ) )  
+              paste( "# @cx.output", utils::tail( test_output_ref, n = 3 ) ) )  
     
     writeLines( pgm, con = xpgm )
     
@@ -388,10 +388,10 @@ testthat::test_that( "batchlocalfs-output.multiProgramMultipleOutputs", {
   }
   
   
-  for ( xpgm in tail( test_programs, n = 2) ) {
+  for ( xpgm in utils::tail( test_programs, n = 2) ) {
     
     pgm <- c( "# test program",
-              paste( "# @cx.output", head( test_output_ref, n = 2 ) ) )  
+              paste( "# @cx.output", utils::head( test_output_ref, n = 2 ) ) )  
     
     writeLines( pgm, con = xpgm )
     
