@@ -7,8 +7,7 @@
 cxlib_batch(
   x,
   options = list(logs = NULL, log.fileext = "Rout"),
-  silent = FALSE,
-  trace = FALSE
+  silent = FALSE
 )
 }
 \arguments{
@@ -16,9 +15,7 @@ cxlib_batch(
 
 \item{options}{List of options for executing R programs}
 
-\item{silent}{(Not implemented) Disable messaging}
-
-\item{trace}{Enable trace messages}
+\item{silent}{Disable messaging}
 }
 \value{
 Named list of execution results

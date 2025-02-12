@@ -73,6 +73,11 @@ cxlib_batch <- function( x, options = list( "logs" = NULL, "log.fileext" = "Rout
     stop( "Work area is not defined in job execution definition" )
     
   
+  on.exit({
+    base::unlink( exec_job[["work.area"]], recursive = TRUE, force = TRUE )
+  }, add = TRUE )
+  
+  
   # -- execute
   
   for ( xi in 1:length(exec_job[["actions"]]) ) {
